@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
-import datetime
+from datetime import datetime
+import re
+import json
 
-file_timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+file_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
 
 class Tvn24Spider(scrapy.Spider):
@@ -12,6 +14,10 @@ class Tvn24Spider(scrapy.Spider):
         'https://tvnwarszawa.tvn24.pl/informacje,news,pali-sie-warsztat-na-mokotowie,252843.html',
         'https://tvnwarszawa.tvn24.pl/ulice,news,nie-ustapil-pierwszenstwa-mial-poltora-promila-alkoholu,252815.html',
         'https://tvnwarszawa.tvn24.pl/informacje,news,dwa-tygodnie-bezplatnych-zajec-warsztatow-i-sportu,250180.html'
+        'https://tvnwarszawa.tvn24.pl/informacje,news,pozar-golfa-przy-belwederskiej,85305.html',
+        'https://tvnwarszawa.tvn24.pl/informacje,news,pozar-budynku-przy-modlinskiej,151326.html',
+        'https://tvnwarszawa.tvn24.pl/informacje,news,wyrzna-drzewa-zakopia-gazociag-bra-co-potem-konkretow-brak,252345.html',
+        'https://tvnwarszawa.tvn24.pl/informacje,news,naczelnik-skarbowki-powiesil-siebr-w-areszcie-zarzuty-dla-straznikow,252836.html'
     ]
 
     def parse(self, response):
@@ -38,8 +44,23 @@ class Tvn24Spider(scrapy.Spider):
             "text": text
         }
 
+        data = self.normalize(data)
+
         file_path = 'results.{}.{}.jsonl'.format(Tvn24Spider.name,
                                                  file_timestamp)
 
         with open(file_path, 'a') as f:
-            f.write("{}\n".format(str(data)))
+            json_data = json.dumps(data, ensure_ascii=False)
+            f.write("{}\n".format(json_data))
+
+
+    def normalize(self, data):
+        data["timestamp"] = re.sub("[\n\r]*", "", data["timestamp"]).strip()
+        if " " in data["timestamp"]:
+            data["timestamp"] = datetime.strptime(data["timestamp"], "%d.%m.%Y %H:%M")
+        else:
+            date_now = datetime.combine(datetime.today(), datetime.min.time())
+            time = datetime.strptime(data["timestamp"], "%H:%M")
+            data["timestamp"] = date_now.replace(hour=time.hour, minute=time.minute)
+        data["timestamp"] = data["timestamp"].strftime( "%Y-%m-%d %H:%M")
+        return data
