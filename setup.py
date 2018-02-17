@@ -1,5 +1,6 @@
 import os
 import sys
+from distutils.core import setup
 
 with open(os.path.join(os.path.dirname(__file__), 'requirements.txt')) as f:
     if sys.version_info[0] == 2:
