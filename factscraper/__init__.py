@@ -7,6 +7,8 @@ from tqdm import tqdm
 from newspaper import Article, build as build_newspaper
 from newspaper.article import ArticleException
 
+from factscraper.time_retriever import get_timestamp
+
 def _clean_url(url):
     parsed_url = urlparse(url)
     url = urlunparse(
@@ -19,13 +21,16 @@ def _clean_url(url):
 def _format_timestamp(timestamp):
     return timestamp.strftime("%Y-%m-%d %H:%M")
 
+def _get_timestamp(url):
+    return get_timestamp(url)
+
 def _get_domain(url):
     domain = _clean_url(url)[1]
     return domain
 
-def _filter_domain(article, wanted_domain):
+def _filter_article(article, wanted_domain, blacklist):
     link_domain = _get_domain(article.url)
-    return wanted_domain == link_domain
+    return wanted_domain == link_domain and article.url not in blacklist
 
 def parse(url):
     """Returns a dict of information about an article with a given url."""
@@ -39,9 +44,9 @@ def parse_article(article):
     article.parse()
     # FIXME: the date gets lost sometimes like: http://warszawa.wyborcza.pl/warszawa/7,54420,23034886,biurowce-kusza-parkingami-a-ratusz-nagina-wlasne-normy-zapisy.html?utm_source=facebook.com&utm_medium=SM&utm_campaign=FB_Warszawa_Wyborcza
     timestamp = article.publish_date
-    if timestamp is not None:
-        timestamp = _format_timestamp(timestamp)
-
+    if timestamp is None:
+        timestamp = _get_timestamp(clean_url)
+    timestamp = _format_timestamp(timestamp)
     data = {
         "url": clean_url,
         "netloc": netloc,
@@ -74,12 +79,12 @@ def save_article(article_dict, file_timestamp=None):
         stripped = inter.strip()
         sentences_text = sentences_text.replace(inter, stripped+"\n")
     sentences = sentences_text.split('\n')
-    sentences_text = "\n".join(list(filter(lambda x: len(x) > 5, sentences)))
+    sentences_text = article_dict['url']+"\n"+"\n".join(list(filter(lambda x: len(x) > 5, sentences)))
 
     with open(sentences_file_path, 'a') as file_:
         file_.write("{}\n".format(sentences_text))
 
-def crawl(url, verbose=False):
+def crawl(url, verbose=False, blacklist=set(), to_explore=set()):
     """Searches for articles on a news website."""
     file_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
@@ -88,7 +93,10 @@ def crawl(url, verbose=False):
         print("Retrieving site {} filtered for domain {}".format(url, domain))
 
     news_site = build_newspaper(url, language="pl")
-    articles = list(filter(lambda x: _filter_domain(x, domain), news_site.articles))
+    articles = list(filter(lambda x: _filter_article(x, domain, blacklist), news_site.articles))
+
+    blacklist = set.union(blacklist, [_clean_url(art.url)[0] for art in articles])
+    to_explore = set.union(to_explore, [_clean_url(art.url)[0] for art in articles])
 
     domains = {}
     for article in news_site.articles:
@@ -97,14 +105,15 @@ def crawl(url, verbose=False):
             domains[dom] = 1
         else:
             domains[dom] += 1
-
     if verbose:
-        print("Found {} articles in correct domain, {} articles total".format(
-            len(articles), len(news_site.articles)))
+        print(("Found {} unblacklisted articles in correct domain, {} articles"
+               " total, {} on blacklist, {} left to explore").format(
+            len(articles), len(news_site.articles), len(blacklist),
+                  len(to_explore)))
         print("Domains:")
         for dom, number in domains.items():
             print("\t{}: {}".format(dom, number))
-    
+
     if verbose:
         iterator = tqdm(articles)
     else:
@@ -115,3 +124,9 @@ def crawl(url, verbose=False):
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
             pass
+
+    if len(to_explore) > 0:
+        crawl(to_explore.pop(), verbose=verbose, blacklist=blacklist,
+              to_explore=to_explore)
+
+    return blacklist
