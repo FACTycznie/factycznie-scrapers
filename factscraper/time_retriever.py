@@ -20,6 +20,13 @@ def get_timestamp(url):
         return datetime.strptime(date, "%Y-%m-%d")
     except:
         pass
+    # wiadomosci.gazeta.pl
+    try:
+        maybs = soup.findAll("div", {"id":"gazeta_article_date"})[0].text.strip()
+        date = re.findall("[0-9]{2}.[0-9]{2}.[0-9]{4}", maybs)[0]
+        return datetime.strptime(date, "%d.%m.%Y")
+    except:
+        pass
     
 def get_all_links(url):
     html = requests.get(url).content
