@@ -45,7 +45,7 @@ def get_all_links(url):
     urls = set([link.get('href') for link in soup.find_all('a')])
     bad_words = ['kontakt', 'regulamin']
     if urls is not None:
-        urls = set(filter(lambda x: all(word not in x.lower() for word in bad_words), urls))
+        urls = set(filter(lambda x: all(x is not None and word not in x.lower() for word in bad_words), urls))
     else:
         return []
 
@@ -119,7 +119,7 @@ def save_article(article_dict, file_timestamp=None):
         file_.write("{}\n".format(article_dict['url']))
 
 def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
-          minimum_title_len=12):
+          minimum_title_len=12, download_limit=-1):
     """Searches for articles on a news website."""
     file_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
@@ -169,9 +169,13 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
             pass
+        if download_limit > 0:
+            download_limit -= 1
+        if download_limit == 0:
+            break
 
     if len(to_explore) > 0:
         crawl(to_explore.pop(), verbose=verbose, blacklist=blacklist,
-              to_explore=to_explore)
+              to_explore=to_explore, download_limit=download_limit)
 
     return blacklist
