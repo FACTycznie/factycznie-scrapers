@@ -34,3 +34,10 @@ def get_timestamp(url):
         return datetime.strptime(date, "%d.%m.%Y")
     except:
         pass
+    # tvn24.pl
+    try:
+        maybs = soup.findAll("div", {"class":"articleDateContainer borderGreyBottom"})[0].time.get("datetime")
+        date = re.findall("[0-9]{4}-[0-9]{2}-[0-9]{2}", maybs)[0]
+        return datetime.strptime(date, "%Y-%m-%d")
+    except:
+        pass
