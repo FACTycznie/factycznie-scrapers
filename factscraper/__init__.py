@@ -33,6 +33,7 @@ def parse_article(article):
     timestamp = article.publish_date
     if timestamp is not None:
         timestamp = _format_timestamp(timestamp)
+
     data = {
         "url": clean_url,
         "netloc": netloc,
@@ -58,16 +59,39 @@ def save_article(article_dict, file_timestamp=None):
         json_data = json.dumps(article_dict, ensure_ascii=False)
         file_.write("{}\n".format(json_data))
 
+def _get_domain(url):
+    domain = _clean_url(url)[1]
+    return domain
+
+def _filter_domain(article, wanted_domain):
+    link_domain = _get_domain(article.url)
+    return wanted_domain == link_domain
+
 def crawl(url, verbose=False):
     """Searches for articles on a news website."""
     file_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
+    domain = _get_domain(url)
     if verbose:
-        print("Retrieving site", url)
+        print("Retrieving site {} filtered for domain {}".format(url, domain))
+
     news_site = build_newspaper(url, language="pl")
-    articles = news_site.articles
+    articles = list(filter(lambda x: _filter_domain(x, domain), news_site.articles))
+
+    domains = {}
+    for article in news_site.articles:
+        dom = _get_domain(article.url)
+        if dom not in domains:
+            domains[dom] = 1
+        else:
+            domains[dom] += 1
+
     if verbose:
-        print("Found {} links".format(len(news_site.articles)))
+        print("Found {} articles in correct domain, {} articles total".format(
+            len(articles), len(news_site.articles)))
+        print("Domains:")
+        for dom, number in domains.items():
+            print("\t{}: {}".format(dom, number))
     
     if verbose:
         iterator = tqdm(articles)
