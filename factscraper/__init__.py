@@ -168,7 +168,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
                 continue
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
-            pass
+            continue
         if download_limit > 0:
             download_limit -= 1
         if download_limit == 0:
