@@ -1,2 +1,11 @@
+# intellij
 .idea
+
+# python binaries
 __pycache__
+
+# vim
+*.swp
+
+# virtualenv
+.venv
