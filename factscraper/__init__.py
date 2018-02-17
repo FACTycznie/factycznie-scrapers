@@ -161,6 +161,8 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
             article_dict = parse_article(article)
             if len(article_dict['title']) < minimum_title_len:
                 continue
+            if len(article_dict['text']) < minimum_title_len:
+                continue
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
             pass
