@@ -4,6 +4,7 @@ from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 from random import random
 from time import sleep
+from urllib3.exceptions import MaxRetryError
 
 import requests
 from bs4 import BeautifulSoup
@@ -36,8 +37,8 @@ def _filter_article(article, wanted_domain, blacklist):
     link_domain = _get_domain(article.url)
     return wanted_domain == link_domain and article.url not in blacklist
 
-def _sleep_for_a_bit():
-    sleep(0.5+(random()))
+def _sleep_for_a_bit(base_time=0.5):
+    sleep(base_time+(random()))
 
 def get_all_links(url):
     html = requests.get(url).content
@@ -168,6 +169,9 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
                 continue
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
+            continue
+        except MaxRetryError:
+            _sleep_for_a_bit(5)
             continue
         if download_limit > 0:
             download_limit -= 1
