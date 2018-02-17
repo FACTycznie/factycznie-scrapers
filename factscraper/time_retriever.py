@@ -27,6 +27,13 @@ def get_timestamp(url):
         return datetime.strptime(date, "%d.%m.%Y")
     except:
         pass
+    # rp.pl
+    try:
+        maybs = re.findall("Publikacja\: \<time\>[0-9\.]{10}", str(html))[0]
+        date = re.findall("[0-9]{2}.[0-9]{2}.[0-9]{4}", maybs)[0]
+        return datetime.strptime(date, "%d.%m.%Y")
+    except:
+        pass
     
 def get_all_links(url):
     html = requests.get(url).content
