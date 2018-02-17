@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 import requests
@@ -11,4 +12,11 @@ def get_timestamp(url):
         maybs = soup.findAll("a", {"class":"article-date"})[0].get('href')[-10:]
         return datetime.strptime(maybs, "%Y-%m-%d")
     except:
-        raise
+        pass
+    # naszemiasto
+    try:
+        maybs = soup.findAll("div", {"class":"matZrodlo"})[0].span.text.strip()
+        date = re.findall("[0-9]{4}-[0-9]{2}-[0-9]{2}", maybs)[0]
+        return datetime.strptime(date, "%Y-%m-%d")
+    except:
+        pass
