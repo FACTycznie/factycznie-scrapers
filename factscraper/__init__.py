@@ -7,7 +7,7 @@ from tqdm import tqdm
 from newspaper import Article, build as build_newspaper
 from newspaper.article import ArticleException
 
-from factscraper.time_retriever import get_timestamp
+from factscraper.time_retriever import get_timestamp, get_all_links
 
 def _clean_url(url):
     parsed_url = urlparse(url)
@@ -46,7 +46,8 @@ def parse_article(article):
     timestamp = article.publish_date
     if timestamp is None:
         timestamp = _get_timestamp(clean_url)
-    timestamp = _format_timestamp(timestamp)
+    if timestamp is not None:
+        timestamp = _format_timestamp(timestamp)
     data = {
         "url": clean_url,
         "netloc": netloc,
@@ -83,6 +84,11 @@ def save_article(article_dict, file_timestamp=None):
 
     with open(sentences_file_path, 'a') as file_:
         file_.write("{}\n".format(sentences_text))
+    titles_file_path = 'articles/{}.{}.titles'.format(article_dict['netloc'],
+                                                            file_timestamp)
+    with open(titles_file_path, 'a') as file_:
+        file_.write("{}\n".format(article_dict['title']))
+    
 
 def crawl(url, verbose=False, blacklist=set(), to_explore=set()):
     """Searches for articles on a news website."""
