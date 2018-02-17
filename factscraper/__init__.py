@@ -21,7 +21,7 @@ def _clean_url(url):
     return url, parsed_url.netloc
 
 def _format_timestamp(timestamp):
-    return timestamp.strftime("%Y-%m-%d %H:%M")
+    return timestamp.strftime("%Y-%m-%d")
 
 def _get_timestamp(url):
     return get_timestamp(url)
