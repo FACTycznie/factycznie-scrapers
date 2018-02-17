@@ -14,7 +14,7 @@ from factscraper.time_retriever import get_timestamp, get_all_links
 def _clean_url(url):
     parsed_url = urlparse(url)
     url = urlunparse(
-        (parsed_url.scheme,
+        ("https",
          parsed_url.netloc,
          parsed_url.path,
          "", "", ""))
