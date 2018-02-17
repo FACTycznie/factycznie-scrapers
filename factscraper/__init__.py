@@ -19,6 +19,14 @@ def _clean_url(url):
 def _format_timestamp(timestamp):
     return timestamp.strftime("%Y-%m-%d %H:%M")
 
+def _get_domain(url):
+    domain = _clean_url(url)[1]
+    return domain
+
+def _filter_domain(article, wanted_domain):
+    link_domain = _get_domain(article.url)
+    return wanted_domain == link_domain
+
 def parse(url):
     """Returns a dict of information about an article with a given url."""
     article = Article(url, language='pl')
@@ -53,19 +61,23 @@ def save_article(article_dict, file_timestamp=None):
     if file_timestamp is None:
         file_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     
-    file_path = 'articles/{}.{}.jsonl'.format(article_dict['netloc'],
+    json_file_path = 'articles/{}.{}.jsonl'.format(article_dict['netloc'],
                                               file_timestamp)
-    with open(file_path, 'a') as file_:
+    with open(json_file_path, 'a') as file_:
         json_data = json.dumps(article_dict, ensure_ascii=False)
         file_.write("{}\n".format(json_data))
 
-def _get_domain(url):
-    domain = _clean_url(url)[1]
-    return domain
+    sentences_file_path = 'articles/{}.{}.sentences'.format(article_dict['netloc'],
+                                                            file_timestamp)
+    sentences_text = article_dict['text']
+    for inter in [". ", "... ", "? ", "! ", ".", "...", "?", "!"]:
+        stripped = inter.strip()
+        sentences_text = sentences_text.replace(inter, stripped+"\n")
+    sentences = sentences_text.split('\n')
+    sentences_text = "\n".join(list(filter(lambda x: len(x) > 5, sentences)))
 
-def _filter_domain(article, wanted_domain):
-    link_domain = _get_domain(article.url)
-    return wanted_domain == link_domain
+    with open(sentences_file_path, 'a') as file_:
+        file_.write("{}\n".format(sentences_text))
 
 def crawl(url, verbose=False):
     """Searches for articles on a news website."""
