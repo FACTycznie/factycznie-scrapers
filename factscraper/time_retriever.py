@@ -34,11 +34,3 @@ def get_timestamp(url):
         return datetime.strptime(date, "%d.%m.%Y")
     except:
         pass
-    
-def get_all_links(url):
-    html = requests.get(url).content
-    soup = BeautifulSoup(html, 'lxml')
-    urls = set([link.get('href') for link in soup.find_all('a')])
-    bad_words = ['kontakt', 'regulamin']
-    urls = set(filter(lambda x: all(word not in x for word in bad_words), urls))
-    return urls

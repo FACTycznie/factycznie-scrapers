@@ -5,6 +5,8 @@ from urllib.parse import urlparse, urlunparse
 from random import random
 from time import sleep
 
+import requests
+from bs4 import BeautifulSoup
 from tqdm import tqdm
 from newspaper import Article, build as build_newspaper
 from newspaper.article import ArticleException
@@ -43,7 +45,17 @@ def get_all_links(url):
     urls = set([link.get('href') for link in soup.find_all('a')])
     bad_words = ['kontakt', 'regulamin']
     urls = set(filter(lambda x: all(word not in x for word in bad_words), urls))
-    return urls
+
+    domain = _get_domain(url)
+    out_urls = []
+    for url in urls:
+        parsed_url = urlparse(url)
+        this_domain = parsed_url.netloc
+        if this_domain == "":
+            out_urls.append(urlunparse(("https", domain, parsed_url.path, "", "", "")))
+        else:
+            out_urls.append(urlunparse(("https", this_domain, parsed_url.path, "", "", "")))
+    return out_urls
 
 def parse(url):
     """Returns a dict of information about an article with a given url."""
@@ -101,7 +113,8 @@ def save_article(article_dict, file_timestamp=None):
     with open(url_file_path, 'a') as file_:
         file_.write("{}\n".format(article_dict['url']))
 
-def crawl(url, verbose=False, blacklist=set(), to_explore=set()):
+def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
+          minimum_title_len=12):
     """Searches for articles on a news website."""
     file_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
@@ -109,14 +122,19 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set()):
     if verbose:
         print("Retrieving site {} filtered for domain {}".format(url, domain))
 
-    news_site = build_newspaper(url, language="pl")
-    articles = list(filter(lambda x: _filter_article(x, domain, blacklist), news_site.articles))
+#   news_site = build_newspaper(url, language="pl")
+#   articles = list(filter(lambda x: _filter_article(x, domain, blacklist), news_site.articles))
+
+    all_links = get_all_links(url)
+    all_articles = [Article(x) for x in all_links]
+    articles = list(filter(lambda x: _filter_article(x, domain,
+                                                     blacklist), all_articles))
 
     blacklist = set.union(blacklist, [_clean_url(art.url)[0] for art in articles])
     to_explore = set.union(to_explore, [_clean_url(art.url)[0] for art in articles])
 
     domains = {}
-    for article in news_site.articles:
+    for article in all_articles:
         dom = _get_domain(article.url)
         if dom not in domains:
             domains[dom] = 1
@@ -125,7 +143,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set()):
     if verbose:
         print(("Found {} unblacklisted articles in correct domain, {} articles"
                " total, {} on blacklist, {} left to explore").format(
-            len(articles), len(news_site.articles), len(blacklist),
+            len(articles), len(all_articles), len(blacklist),
                   len(to_explore)))
         print("Domains:")
         for dom, number in domains.items():
@@ -139,6 +157,8 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set()):
         try:
             _sleep_for_a_bit()
             article_dict = parse_article(article)
+            if len(article_dict['title']) < minimum_title_len:
+                continue
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
             pass
