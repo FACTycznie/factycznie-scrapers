@@ -2,6 +2,8 @@ import os
 import json
 from datetime import datetime
 from urllib.parse import urlparse, urlunparse
+from random import random
+from time import sleep
 
 from tqdm import tqdm
 from newspaper import Article, build as build_newspaper
@@ -31,6 +33,9 @@ def _get_domain(url):
 def _filter_article(article, wanted_domain, blacklist):
     link_domain = _get_domain(article.url)
     return wanted_domain == link_domain and article.url not in blacklist
+
+def _sleep_for_a_bit():
+    sleep(1+(random()))
 
 def parse(url):
     """Returns a dict of information about an article with a given url."""
@@ -126,6 +131,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set()):
         iterator = articles
     for article in iterator:
         try:
+            _sleep_for_a_bit()
             article_dict = parse_article(article)
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
