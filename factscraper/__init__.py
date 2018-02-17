@@ -37,7 +37,7 @@ def _filter_article(article, wanted_domain, blacklist):
     return wanted_domain == link_domain and article.url not in blacklist
 
 def _sleep_for_a_bit():
-    sleep(1+(random()))
+    sleep(0.5+(random()))
 
 def get_all_links(url):
     html = requests.get(url).content
@@ -103,9 +103,11 @@ def save_article(article_dict, file_timestamp=None):
         stripped = inter.strip()
         sentences_text = sentences_text.replace(inter, stripped+"\n")
     sentences = sentences_text.split('\n')
-
+    sentences = list(filter(lambda x: len(x) > 10, sentences))
+    sentences_text = "\n".join(sentences)
     with open(sentences_file_path, 'a') as file_:
         file_.write("{}\n".format(sentences_text))
+
     titles_file_path = 'articles/{}.titles'.format(article_dict['netloc'])
     with open(titles_file_path, 'a') as file_:
         file_.write("{}\n".format(article_dict['title']))
