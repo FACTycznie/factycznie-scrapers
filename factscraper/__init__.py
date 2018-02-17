@@ -9,7 +9,7 @@ from tqdm import tqdm
 from newspaper import Article, build as build_newspaper
 from newspaper.article import ArticleException
 
-from factscraper.time_retriever import get_timestamp, get_all_links
+from factscraper.time_retriever import get_timestamp
 
 def _clean_url(url):
     parsed_url = urlparse(url)
@@ -36,6 +36,14 @@ def _filter_article(article, wanted_domain, blacklist):
 
 def _sleep_for_a_bit():
     sleep(1+(random()))
+
+def get_all_links(url):
+    html = requests.get(url).content
+    soup = BeautifulSoup(html, 'lxml')
+    urls = set([link.get('href') for link in soup.find_all('a')])
+    bad_words = ['kontakt', 'regulamin']
+    urls = set(filter(lambda x: all(word not in x for word in bad_words), urls))
+    return urls
 
 def parse(url):
     """Returns a dict of information about an article with a given url."""
@@ -72,28 +80,26 @@ def save_article(article_dict, file_timestamp=None):
     if file_timestamp is None:
         file_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     
-    json_file_path = 'articles/{}.{}.jsonl'.format(article_dict['netloc'],
-                                              file_timestamp)
+    json_file_path = 'articles/{}.jsonl'.format(article_dict['netloc'])
     with open(json_file_path, 'a') as file_:
         json_data = json.dumps(article_dict, ensure_ascii=False)
         file_.write("{}\n".format(json_data))
 
-    sentences_file_path = 'articles/{}.{}.sentences'.format(article_dict['netloc'],
-                                                            file_timestamp)
+    sentences_file_path = 'articles/{}.sentences'.format(article_dict['netloc'])
     sentences_text = article_dict['text']
     for inter in [". ", "... ", "? ", "! ", ".", "...", "?", "!"]:
         stripped = inter.strip()
         sentences_text = sentences_text.replace(inter, stripped+"\n")
     sentences = sentences_text.split('\n')
-    sentences_text = article_dict['url']+"\n"+"\n".join(list(filter(lambda x: len(x) > 5, sentences)))
 
     with open(sentences_file_path, 'a') as file_:
         file_.write("{}\n".format(sentences_text))
-    titles_file_path = 'articles/{}.{}.titles'.format(article_dict['netloc'],
-                                                            file_timestamp)
+    titles_file_path = 'articles/{}.titles'.format(article_dict['netloc'])
     with open(titles_file_path, 'a') as file_:
         file_.write("{}\n".format(article_dict['title']))
-    
+    url_file_path = 'articles/{}.urls'.format(article_dict['netloc'])
+    with open(url_file_path, 'a') as file_:
+        file_.write("{}\n".format(article_dict['url']))
 
 def crawl(url, verbose=False, blacklist=set(), to_explore=set()):
     """Searches for articles on a news website."""
