@@ -44,7 +44,10 @@ def get_all_links(url):
     soup = BeautifulSoup(html, 'lxml')
     urls = set([link.get('href') for link in soup.find_all('a')])
     bad_words = ['kontakt', 'regulamin']
-    urls = set(filter(lambda x: all(word not in x for word in bad_words), urls))
+    if urls is not None:
+        urls = set(filter(lambda x: all(word not in x.lower() for word in bad_words), urls))
+    else:
+        return []
 
     domain = _get_domain(url)
     out_urls = []
