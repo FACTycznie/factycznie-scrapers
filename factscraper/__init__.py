@@ -5,6 +5,7 @@ from urllib.parse import urlparse, urlunparse
 from random import random
 from time import sleep
 from urllib3.exceptions import MaxRetryError
+import re
 
 import requests
 from bs4 import BeautifulSoup
@@ -28,6 +29,25 @@ def _format_timestamp(timestamp):
 
 def _get_timestamp(url):
     return get_timestamp(url)
+
+def _get_sources(url):
+    html = requests.get(url).content
+    soup = BeautifulSoup(html, 'lxml')
+
+    possible_sources = soup.findAll(text=re.compile("ódło:"))
+    if len(possible_sources) > 0:
+        #possible_sources = [re.findall("ródło:[\ \n]*([a-zA-Z0-9\.]*)",
+        possible_sources = [possible_source.parent.parent.get_text().strip().replace("\n"," ") for possible_source in possible_sources]
+        sources = []
+        for source in possible_sources:
+            reg = re.findall("ródło:[\ \n]*(?:([ąęśćiłĄĘŚĆiŁa-zA-Z0-9]*)[\ ;,]*)", source)
+            sources.extend(reg)
+        print(url)
+        print(possible_sources)
+        print(sources)
+        if len(sources) > 0:
+            return sources
+    return []
 
 def _get_domain(url):
     domain = _clean_url(url)[1]
@@ -78,6 +98,7 @@ def parse_article(article, scheme='https'):
         timestamp = _get_timestamp(clean_url)
     if timestamp is not None:
         timestamp = _format_timestamp(timestamp)
+    source = _get_sources(clean_url)
     data = {
         "url": clean_url,
         "netloc": netloc,
@@ -85,7 +106,8 @@ def parse_article(article, scheme='https'):
         "timestamp": timestamp,
         "text": article.text,
         "authors": article.authors,
-        "tags": list(article.tags)}
+        "tags": list(article.tags),
+        "sources": source}
     return data
 
 def save_article(article_dict, file_timestamp=None):

@@ -12,4 +12,6 @@ if len(sys.argv) < 2:
 """)
     exit(0)
 
-print(parse(sys.argv[1])['timestamp'])
+parsed = parse(sys.argv[1])
+print("Found timestamp:", parsed['timestamp'])
+print("Found sources:", parsed['sources'])
