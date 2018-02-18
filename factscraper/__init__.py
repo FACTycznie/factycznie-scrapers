@@ -13,14 +13,16 @@ from tqdm import tqdm
 from newspaper import Article, build as build_newspaper
 from newspaper.article import ArticleException
 
-def _clean_url(url, scheme="https"):
+def _clean_url(url, scheme=""):
     parsed_url = urlparse(url)
+    if scheme is None:
+        scheme = parsed_url.scheme
     url = urlunparse(
         (scheme,
          parsed_url.netloc,
          parsed_url.path,
          "", "", ""))
-    return url, parsed_url.netloc
+    return url, parsed_url.netloc, parsed_url.scheme
 
 from factscraper.time_retriever import get_timestamp
 
@@ -30,8 +32,7 @@ def _format_timestamp(timestamp):
 def _get_timestamp(url):
     return get_timestamp(url)
 
-def _get_sources(url):
-    html = requests.get(url).content
+def _get_sources(html):
     soup = BeautifulSoup(html, 'lxml')
 
     possible_sources = soup.findAll(text=re.compile("ódło:"))
@@ -44,9 +45,6 @@ def _get_sources(url):
             lowercased = list(map(lambda x: x.lower(), reg))
             sources = set.union(sources, lowercased)
         sources = list(sources)
-        print(url)
-        print(possible_sources)
-        print(sources)
         if len(sources) > 0:
             return sources
     return []
@@ -55,9 +53,9 @@ def _get_domain(url):
     domain = _clean_url(url)[1]
     return domain
 
-def _filter_article(article, wanted_domain, blacklist):
-    link_domain = _get_domain(article.url)
-    return wanted_domain == link_domain and article.url not in blacklist
+def _filter_article(url, wanted_domain, blacklist):
+    link_domain = _get_domain(url)
+    return wanted_domain == link_domain and url not in blacklist
 
 def _sleep_for_a_bit(base_time=0.5):
     sleep(base_time+(random()))
@@ -89,18 +87,16 @@ def parse(url):
     return parse_article(article)
 
 def parse_article(article):
-    clean_url, netloc = _clean_url(article.url)
+    clean_url, netloc, scheme = _clean_url(article.url, scheme=None)
 
     article.download()
     article.parse()
-    # FIXME: the date gets lost sometimes like: http://warszawa.wyborcza.pl/warszawa/7,54420,23034886,biurowce-kusza-parkingami-a-ratusz-nagina-wlasne-normy-zapisy.html?utm_source=facebook.com&utm_medium=SM&utm_campaign=FB_Warszawa_Wyborcza
     timestamp = article.publish_date
     if timestamp is None:
-        _sleep_for_a_bit(2)
-        timestamp = _get_timestamp(clean_url)
+        timestamp = _get_timestamp(article.html)
     if timestamp is not None:
         timestamp = _format_timestamp(timestamp)
-    source = _get_sources(clean_url)
+    source = _get_sources(article.html)
     data = {
         "url": clean_url,
         "netloc": netloc,
@@ -158,8 +154,8 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
 
     all_links = get_all_links(url)
     all_articles = [Article(x) for x in all_links]
-    articles = list(filter(lambda x: _filter_article(x, domain,
-                                                     blacklist), all_articles))
+    articles = list(filter(lambda x: _filter_article(_clean_url(x.url)[0], 
+        domain, blacklist), all_articles))
 
     if len(articles) > download_limit:
         articles = articles[:download_limit]
@@ -197,16 +193,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
                 continue
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
-            try:
-                article = Article(_clean_url(article.url, scheme='http')[0])
-                article_dict = parse_article(article, scheme='http')
-                if len(article_dict['title']) < minimum_title_len:
-                    continue
-                if len(article_dict['text']) < minimum_title_len:
-                    continue
-                save_article(article_dict, file_timestamp=file_timestamp)
-            except ArticleException:
-                continue
+            continue
         except MaxRetryError:
             _sleep_for_a_bit(5)
             continue

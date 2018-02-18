@@ -13,5 +13,9 @@ if len(sys.argv) < 2:
     exit(0)
 
 parsed = parse(sys.argv[1])
+print("Title:", parsed['title'])
+print("Text:", parsed['text'])
+print("Found authors:", parsed['authors'])
+print("Found domain:", parsed['netloc'])
 print("Found timestamp:", parsed['timestamp'])
 print("Found sources:", parsed['sources'])
