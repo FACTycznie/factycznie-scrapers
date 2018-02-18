@@ -76,9 +76,9 @@ def get_all_links(url):
         parsed_url = urlparse(url)
         this_domain = parsed_url.netloc
         if this_domain == "":
-            out_urls.append(urlunparse(("https", domain, parsed_url.path, "", "", "")))
+            out_urls.append(urlunparse((parsed_url.scheme, domain, parsed_url.path, "", "", "")))
         else:
-            out_urls.append(urlunparse(("https", this_domain, parsed_url.path, "", "", "")))
+            out_urls.append(urlunparse((parsed_url.scheme, this_domain, parsed_url.path, "", "", "")))
     return out_urls
 
 def parse(url):
@@ -89,6 +89,7 @@ def parse(url):
 def parse_article(article):
     clean_url, netloc, scheme = _clean_url(article.url, scheme=None)
 
+    print(clean_url)
     article.download()
     article.parse()
     timestamp = article.publish_date

@@ -34,8 +34,6 @@ opts = docopt(__doc__, help=True)
 
 urls = opts['<article-urls>']
 
-print(urls)
-
 for url in urls:
     try:
         download_limit = _interpret_num(opts['-n'])
