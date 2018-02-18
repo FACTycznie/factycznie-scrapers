@@ -154,6 +154,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
 #   articles = list(filter(lambda x: _filter_article(x, domain, blacklist), news_site.articles))
 
     all_links = get_all_links(url)
+
     all_articles = [Article(x) for x in all_links]
     articles = list(filter(lambda x: _filter_article(_clean_url(x.url)[0], 
         domain, blacklist), all_articles))
@@ -162,7 +163,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
         articles = articles[:download_limit]
 
     blacklist = set.union(blacklist, [_clean_url(art.url)[0] for art in articles])
-    to_explore = set.union(to_explore, [_clean_url(art.url)[0] for art in articles])
+    to_explore = set.union(to_explore, [_clean_url(art.url, scheme=None)[0] for art in articles])
 
     domains = {}
     for article in all_articles:
