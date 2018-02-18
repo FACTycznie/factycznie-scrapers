@@ -58,7 +58,7 @@ def _get_domain(url):
 
 def _filter_article(url, wanted_domain, blacklist):
     link_domain = _get_domain(url)
-    return wanted_domain == link_domain and url not in blacklist
+    return wanted_domain == link_domain and _clean_url(url)[0] not in blacklist
 
 def _sleep_for_a_bit(base_time=0.5):
     sleep(base_time+(random()))
