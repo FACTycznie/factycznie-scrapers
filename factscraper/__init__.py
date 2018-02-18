@@ -74,6 +74,7 @@ def parse_article(article, scheme='https'):
     # FIXME: the date gets lost sometimes like: http://warszawa.wyborcza.pl/warszawa/7,54420,23034886,biurowce-kusza-parkingami-a-ratusz-nagina-wlasne-normy-zapisy.html?utm_source=facebook.com&utm_medium=SM&utm_campaign=FB_Warszawa_Wyborcza
     timestamp = article.publish_date
     if timestamp is None:
+        _sleep_for_a_bit(2)
         timestamp = _get_timestamp(clean_url)
     if timestamp is not None:
         timestamp = _format_timestamp(timestamp)
@@ -136,6 +137,9 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
     articles = list(filter(lambda x: _filter_article(x, domain,
                                                      blacklist), all_articles))
 
+    if len(articles) > download_limit:
+        articles = articles[:download_limit]
+
     blacklist = set.union(blacklist, [_clean_url(art.url)[0] for art in articles])
     to_explore = set.union(to_explore, [_clean_url(art.url)[0] for art in articles])
 
@@ -147,7 +151,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
         else:
             domains[dom] += 1
     if verbose:
-        print(("Found {} unblacklisted articles in correct domain, {} articles"
+        print(("Found {} in the correct domain to download, {} articles"
                " total, {} on blacklist, {} left to explore").format(
             len(articles), len(all_articles), len(blacklist),
                   len(to_explore)))
@@ -187,7 +191,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
         if download_limit == 0:
             break
 
-    if len(to_explore) > 0:
+    if len(to_explore) > 0 and dowload_limit != 0:
         crawl(to_explore.pop(), verbose=verbose, blacklist=blacklist,
               to_explore=to_explore, download_limit=download_limit)
 
