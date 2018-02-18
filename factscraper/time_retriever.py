@@ -33,6 +33,14 @@ def get_timestamp(url):
         return datetime.strptime(date, "%d.%m.%Y")
     except:
         pass
+    # misc
+    try:
+        maybs = soup.findAll("time")[0].get('datetime').strip()
+        date = re.findall("[0-9]{4}-[0-9]{2}-[0-9]{2}", maybs)[0]
+        return datetime.strptime(date, "%Y-%m-%d")
+    except:
+        pass
+
     # rp.pl
     try:
         maybs = re.findall("Publikacja\: \<time\>[0-9\.]{10}", str(html))[0]
@@ -45,5 +53,12 @@ def get_timestamp(url):
         maybs = soup.findAll("div", {"class":"articleDateContainer borderGreyBottom"})[0].time.get("datetime")
         date = re.findall("[0-9]{4}-[0-9]{2}-[0-9]{2}", maybs)[0]
         return datetime.strptime(date, "%Y-%m-%d")
+    except:
+        pass
+    # fronda.pl
+    try:
+        maybs = soup.findAll("span",{'class':'author-block'})[0].text
+        date = re.findall("[0-9]{2}.[0-9]{2}.[0-9]{4}", maybs)[0]
+        return datetime.strptime(date, "%d.%m.%Y")
     except:
         pass
