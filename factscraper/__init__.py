@@ -41,8 +41,8 @@ def _get_sources(url):
         sources = set()
         for source in possible_sources:
             reg = re.findall("ródło:[\ \r\n]*(?:([ąęśćiłĄĘŚĆiŁa-zA-Z0-9.]*)[\ ;,]*)", source)
-            reg = list(map(lambda x: x.lower(), reg))
-            set.union(sources, reg)
+            lowercased = list(map(lambda x: x.lower(), reg))
+            sources = set.union(sources, lowercased)
         sources = list(sources)
         print(url)
         print(possible_sources)
@@ -88,8 +88,8 @@ def parse(url):
     article = Article(url, language='pl')
     return parse_article(article)
 
-def parse_article(article, scheme='https'):
-    clean_url, netloc = _clean_url(article.url, scheme=scheme)
+def parse_article(article):
+    clean_url, netloc = _clean_url(article.url)
 
     article.download()
     article.parse()
