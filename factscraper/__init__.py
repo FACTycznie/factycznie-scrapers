@@ -12,8 +12,6 @@ from tqdm import tqdm
 from newspaper import Article, build as build_newspaper
 from newspaper.article import ArticleException
 
-from factscraper.time_retriever import get_timestamp
-
 def _clean_url(url, scheme="https"):
     parsed_url = urlparse(url)
     url = urlunparse(
@@ -22,6 +20,8 @@ def _clean_url(url, scheme="https"):
          parsed_url.path,
          "", "", ""))
     return url, parsed_url.netloc
+
+from factscraper.time_retriever import get_timestamp
 
 def _format_timestamp(timestamp):
     return timestamp.strftime("%Y-%m-%d")

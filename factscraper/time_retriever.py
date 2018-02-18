@@ -2,10 +2,16 @@ import re
 from datetime import datetime
 
 import requests
+from requests.exceptions import SSLError
 from bs4 import BeautifulSoup
 
+from factscraper import _clean_url
+
 def get_timestamp(url):
-    html = requests.get(url).content
+    try:
+        html = requests.get(url).content
+    except SSLError:
+        html = requests.get(_clean_url(url, scheme='http')[0]).content
     soup = BeautifulSoup(html, 'lxml')
     # interia
     try:
