@@ -37,11 +37,13 @@ def _get_sources(url):
     possible_sources = soup.findAll(text=re.compile("ódło:"))
     if len(possible_sources) > 0:
         #possible_sources = [re.findall("ródło:[\ \n]*([a-zA-Z0-9\.]*)",
-        possible_sources = [possible_source.parent.parent.get_text().strip().replace("\n"," ") for possible_source in possible_sources]
-        sources = []
+        possible_sources = [possible_source.parent.parent.get_text().strip() for possible_source in possible_sources]
+        sources = set()
         for source in possible_sources:
-            reg = re.findall("ródło:[\ \n]*(?:([ąęśćiłĄĘŚĆiŁa-zA-Z0-9]*)[\ ;,]*)", source)
-            sources.extend(reg)
+            reg = re.findall("ródło:[\ \r\n]*(?:([ąęśćiłĄĘŚĆiŁa-zA-Z0-9.]*)[\ ;,]*)", source)
+            reg = list(map(lambda x: x.lower(), reg))
+            set.union(sources, reg)
+        sources = list(sources)
         print(url)
         print(possible_sources)
         print(sources)
