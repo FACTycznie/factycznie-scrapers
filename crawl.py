@@ -12,7 +12,7 @@ Usage:
     ./crawl.py <article-urls> ... [options]
 
 Options:
-    -n NUM  Number of articles to download per domain. [default: 500]
+    -n NUM  Number of articles to download per domain. [default: 1000]
             If `infinite` never stop.
 """
 import sys
