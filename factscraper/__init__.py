@@ -14,10 +14,10 @@ from newspaper.article import ArticleException
 
 from factscraper.time_retriever import get_timestamp
 
-def _clean_url(url):
+def _clean_url(url, scheme="https"):
     parsed_url = urlparse(url)
     url = urlunparse(
-        ("https",
+        (scheme,
          parsed_url.netloc,
          parsed_url.path,
          "", "", ""))
@@ -66,8 +66,8 @@ def parse(url):
     article = Article(url, language='pl')
     return parse_article(article)
 
-def parse_article(article):
-    clean_url, netloc = _clean_url(article.url)
+def parse_article(article, scheme='https'):
+    clean_url, netloc = _clean_url(article.url, scheme=scheme)
 
     article.download()
     article.parse()
@@ -169,7 +169,16 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
                 continue
             save_article(article_dict, file_timestamp=file_timestamp)
         except ArticleException:
-            continue
+            try:
+                article = Article(_clean_url(article.url, scheme='http')[0])
+                article_dict = parse_article(article, scheme='http')
+                if len(article_dict['title']) < minimum_title_len:
+                    continue
+                if len(article_dict['text']) < minimum_title_len:
+                    continue
+                save_article(article_dict, file_timestamp=file_timestamp)
+            except ArticleException:
+                continue
         except MaxRetryError:
             _sleep_for_a_bit(5)
             continue

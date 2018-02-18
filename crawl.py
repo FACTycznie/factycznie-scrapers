@@ -52,5 +52,5 @@ for url in urls:
         crawl(url, verbose=True, blacklist=urls, download_limit=download_limit)
     except MissingSchema: 
         print("Error: Invalid url - missing schema: {}".format(url))
-    except ConnectionError:
-        print("Error: Connection error")
+    except ConnectionError as e:
+        print("Error: Connection error \n{}".format(e.args[0]))
