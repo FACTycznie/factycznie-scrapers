@@ -18,7 +18,7 @@ Options:
 import sys
 
 from docopt import docopt
-from factscraper import crawl, _get_domain
+from factscraper import crawl, _get_domain, _clean_url
 from requests.exceptions import MissingSchema, ConnectionError
 
 def _interpret_num(val):
@@ -46,7 +46,7 @@ for url in urls:
         try:
             with open('articles/{}.urls'.format(domain)) as url_file:
                 for line in url_file:
-                    urls.add(line)
+                    urls.add(_clean_url(line)[0])
         except FileNotFoundError:
             pass
         crawl(url, verbose=True, blacklist=urls, download_limit=download_limit)

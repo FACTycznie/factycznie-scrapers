@@ -192,9 +192,9 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
             domains[dom] += 1
     if verbose:
         print(("Found {} in the correct domain to download, {} articles"
-               " total, {} on blacklist, {} left to explore").format(
+               " total, {} on blacklist, {} left to explore, {} total to download").format(
             len(articles), len(all_articles), len(blacklist),
-                  len(to_explore)))
+                  len(to_explore), download_limit))
         print("Domains:")
         for dom, number in domains.items():
             print("\t{}: {}".format(dom, number))
