@@ -13,6 +13,9 @@ from tqdm import tqdm
 from newspaper import Article, build as build_newspaper
 from newspaper.article import ArticleException
 
+class ParsingError(Exception):
+    """Raised when url parsing fails."""
+
 def _clean_url(url, scheme=""):
     parsed_url = urlparse(url)
     if scheme is None:
@@ -85,8 +88,23 @@ def get_all_links(url):
 
 def parse(url):
     """Returns a dict of information about an article with a given url."""
-    article = Article(url, language='pl')
-    return parse_article(article)
+    clean_url, domain, scheme = _clean_url(url, scheme=None)
+    if scheme in ['http', 'https']:
+        article = Article(clean_url, language='pl')
+        return parse_article(article)
+    else:
+        https_url = _clean_url(url, scheme='https')[0]
+        article = Article(https_url, language='pl')
+        try:
+            return parse_article(article)
+        except:
+            try:
+                http_url = _clean_url(url, scheme='http')[0]
+                article = Article(http_url, language='pl')
+                return parse_article(article)
+            except:
+                raise ParsingError("Could not parse {}".format(url))
+
 
 def parse_article(article):
     clean_url, netloc, scheme = _clean_url(article.url, scheme=None)
