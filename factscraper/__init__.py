@@ -191,7 +191,7 @@ def crawl(url, verbose=False, blacklist=set(), to_explore=set(),
         if download_limit == 0:
             break
 
-    if len(to_explore) > 0 and dowload_limit != 0:
+    if len(to_explore) > 0 and download_limit != 0:
         crawl(to_explore.pop(), verbose=verbose, blacklist=blacklist,
               to_explore=to_explore, download_limit=download_limit)
 
