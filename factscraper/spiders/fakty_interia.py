@@ -32,11 +32,10 @@ class FaktyInteriaSpider(scrapy.Spider):
 
             # Last line might have the author
             last_line = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)][normalize-space()][string-length()>6][last()]//text()").re("[^\ '\\xa0']+"))
-            # TODO: Get authors from two words beginning with capital letters
             capitalized_word_pairs = re.findall("(?:([A-Z][a-z]*)\ ([A-Z][a-z]*))", last_line)
             if len(capitalized_word_pairs) >= 1 and len(last_line) < MAXIMUM_AUTHOR_LINE_LENGTH:
                 author = " ".join(capitalized_word_pairs[-1])
-                text.replace(last_line, " ")
+                text = text.replace(last_line, " ")
             else:
                 author = None
 
@@ -44,7 +43,7 @@ class FaktyInteriaSpider(scrapy.Spider):
             # everything until a giant blob of whitespace
             article_date = dateparser.parse(response.xpath(
                 "/html/body/div/div/div/article/div/div/div/a/text()").re('[0-9].*?(?=\s{2})')[0])
-            sources = response.xpath("/html/body/div/div/div/article/footer/div/cite/meta/@content").extract()
+            sources = response.xpath("//cite[@itemtype='http://schema.org/Organization']//@content").extract()
             out_dict = {
                 "title": title,
                 "text": text,
