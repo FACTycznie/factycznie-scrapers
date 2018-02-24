@@ -1,3 +1,9 @@
+"""
+factscraper
+===========
+This package contains scrapers designed to parse and retrieve usable
+information from Polish news sites.
+"""
 class InvalidArticleError(Exception):
     """Raised when a webpage is not an article"""
 

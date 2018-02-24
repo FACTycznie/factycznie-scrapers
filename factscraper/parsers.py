@@ -1,0 +1,121 @@
+"""This module contains functions that can parse downloaded webpages and
+retrieve desired information from them by combining functionalities
+from other `factscraper` modules.
+"""
+import dateparser
+import re
+
+from factscraper import InvalidArticleError, MINIMUM_ARTICLE_LENGTH, MAXIMUM_AUTHOR_LINE_LENGTH
+
+class GenericParser:
+    """Generic parser that is designed to work on as many sites as
+    possible. All other parsers extend it.
+    """
+    ### For the time being this is a copy of FaktyInteriaParser ###
+    domain = None
+
+    @classmethod
+    def parse(cls, response):
+        out_dict = {
+            'title': cls.parse_title(response),
+            'text': cls.parse_text(response),
+            'publish_date': cls.parse_date(response),
+            'sources': cls.parse_sources(response),
+            'authors': cls.parse_authors(response)}
+
+        if len(out_dict['text']) < MINIMUM_ARTICLE_LENGTH:
+            raise InvalidArticleError("Article is too short")
+
+        return out_dict
+
+    @classmethod
+    def parse_title(cls, response):
+        title_str = response.xpath(
+            "/html/body/div/div/div/article/header/div/h1/text()"
+        ).extract_first()
+        if title_str is not None:
+            return title_str.strip() 
+        return None
+
+    @classmethod
+    def parse_text(cls, response):
+        text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
+        return text
+
+    @classmethod
+    def parse_date(cls, response):
+        date_strings = response.xpath(
+            "/html/body/div/div/div/article/div/div/div/a/text()").re(
+                '[0-9].*?(?=\s{2})')
+        if len(date_strings) > 0:
+            article_date = dateparser.parse(date_strings[0])
+            return article_date
+        return None
+
+    @classmethod
+    def parse_sources(cls, response):
+        sources = response.xpath(
+            "//cite[@itemtype='http://schema.org/Organization']//@content"
+        ).extract()
+        return sources
+    
+    @classmethod
+    def parse_authors(cls, response):
+        text = cls.parse_text(response)
+        last_sentence = re.split("[.!?]", text)[-1]
+        capitalized_word_pairs = re.findall(
+            "(?:([A-Z][a-z]*)\ ([A-Z][a-z]*))", 
+            last_sentence)
+        if len(capitalized_word_pairs) >= 1 and len(last_sentence) < MAXIMUM_AUTHOR_LINE_LENGTH:
+            author = " ".join(capitalized_word_pairs[-1])
+            return [author]
+        return None
+
+class FaktyInteriaParser(GenericParser):
+    """Parser that works on fakty.interia.pl"""
+    domain = 'fakty.interia.pl'
+
+    @classmethod
+    def parse_title(cls, response):
+        title_str = response.xpath(
+            "/html/body/div/div/div/article/header/div/h1/text()"
+        ).extract_first()
+        if title_str is not None:
+            return title_str.strip() 
+        return None
+
+    @classmethod
+    def parse_text(cls, response):
+        text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
+        return text
+
+    @classmethod
+    def parse_date(cls, response):
+        # regex below looks for a number in the timestamp (day) and grabs
+        # everything until a giant blob of whitespace
+        date_strings = response.xpath(
+            "/html/body/div/div/div/article/div/div/div/a/text()").re(
+                '[0-9].*?(?=\s{2})')
+        if len(date_strings) > 0:
+            article_date = dateparser.parse(date_strings[0])
+            return article_date
+        return None
+
+    @classmethod
+    def parse_sources(cls, response):
+        sources = response.xpath(
+            "//cite[@itemtype='http://schema.org/Organization']//@content"
+        ).extract()
+        return sources
+    
+    @classmethod
+    def parse_authors(cls, response):
+        text = cls.parse_text(response)
+        last_sentence = re.split("[.!?]", text)[-1]
+        capitalized_word_pairs = re.findall(
+            "(?:([A-Z][a-z]*)\ ([A-Z][a-z]*))", 
+            last_sentence)
+        if len(capitalized_word_pairs) >= 1 and len(last_sentence) < MAXIMUM_AUTHOR_LINE_LENGTH:
+            author = " ".join(capitalized_word_pairs[-1])
+            return [author]
+        return None
