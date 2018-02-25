@@ -2,10 +2,14 @@
 retrieve desired information from them by combining functionalities
 from other `factscraper` modules.
 """
+import inspect
+import sys
+
 import dateparser
 import re
 
 from factscraper import InvalidArticleError, MINIMUM_ARTICLE_LENGTH, MAXIMUM_AUTHOR_LINE_LENGTH
+from factscraper.util import clean_url, get_domain
 
 class GenericParser:
     """Generic parser that is designed to work on as many sites as
@@ -17,6 +21,8 @@ class GenericParser:
     @classmethod
     def parse(cls, response):
         out_dict = {
+            'url': clean_url(response.url),
+            'domain': get_domain(response.url),
             'title': cls.parse_title(response),
             'text': cls.parse_text(response),
             'publish_date': cls.parse_date(response),
@@ -86,7 +92,7 @@ class FaktyInteriaParser(GenericParser):
 
     @classmethod
     def parse_text(cls, response):
-        text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
+        text = join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()"))
         return text
 
     @classmethod
@@ -119,3 +125,16 @@ class FaktyInteriaParser(GenericParser):
             author = " ".join(capitalized_word_pairs[-1])
             return [author]
         return None
+
+parser_collection = inspect.getmembers(
+    sys.modules[__name__], lambda member: isinstance(member, GenericParser))
+
+parser_dict = {
+    parser.domain: parser for parser in parser_collection}
+
+def select_parser(url):
+    domain = get_domain(url)
+    if domain in parser_dict:
+        return parser_dict[domain]
+    else:
+        return GenericParser
