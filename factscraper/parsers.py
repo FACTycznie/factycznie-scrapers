@@ -132,13 +132,14 @@ def _is_parser(obj):
         return issubclass(obj, GenericParser)
     return False
 
-parser_collection = inspect.getmembers(
+_parser_collection = inspect.getmembers(
     sys.modules[__name__], _is_parser)
 
 parser_dict = {
-    parser_tuple[1].domain: parser_tuple[1] for parser_tuple in parser_collection}
+    parser_tuple[1].domain: parser_tuple[1] for parser_tuple in _parser_collection}
 
 def select_parser(url):
+    """Selects the correct parser for a url based on its domain."""
     domain = get_domain(url)
     if domain in parser_dict:
         return parser_dict[domain]
