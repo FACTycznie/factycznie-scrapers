@@ -66,7 +66,7 @@ class TestGeneralAnalysis(unittest.TestCase):
     def _check_all(self, function):
         for analyzed, desired in zip(self.articles, test_articles):
             function(analyzed, desired, 
-                     msg="Error when analyzing {}".format(desired.initial_url))
+                     msg="\nError when analyzing {}".format(desired.initial_url))
     
     def test_clean_url(self):
         self._check_all(
@@ -81,17 +81,17 @@ class TestGeneralAnalysis(unittest.TestCase):
     def test_title(self):
         self._check_all(
             lambda analyzed, desired, msg: self.assertEqual(
-                analyzed['title'], desired.title))
+                analyzed['title'], desired.title, msg))
 
     def test_sources(self):
         self._check_all(
             lambda analyzed, desired, msg: self.assertSetEqual(
-                set(analyzed['sources']), set(desired.sources)))
+                set(analyzed['sources']), set(desired.sources), msg))
 
     def test_authors(self):
         self._check_all(
             lambda analyzed, desired, msg: self.assertSetEqual(
-                set(analyzed['authors']), set(desired.authors)))
+                set(analyzed['authors']), set(desired.authors), msg))
 
 if __name__ == "__main__":
     unittest.main()
