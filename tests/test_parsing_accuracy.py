@@ -9,7 +9,7 @@ class _TestArticle:
     def __init__(self, initial_url, clean_url, domain, title, text, 
                  publish_date, sources, authors):
         self.initial_url = initial_url
-        self.url = clean_url
+        self.clean_url = clean_url
         self.domain = domain
         self.title = title
         self.text = text
