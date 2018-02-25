@@ -191,7 +191,25 @@ test_articles = [
         [], # Actually this should be ["Gerard Collomb"] or ["Europe 1",
         # "C-News", "Les Echos"] or even ["Francuskie MSW"] but it's
         # too difficult to retrieve for now
-        [])
+        []),
+    _TestArticle(
+        "http://www.se.pl/wiadomosci/polityka/zabiora-kosmonaucie-gwiazdy-miroslaw-hermaszewski-nie-bedzie-juz-generalem_1041634.html",
+        "http://www.se.pl/wiadomosci/polityka/zabiora-kosmonaucie-gwiazdy-miroslaw-hermaszewski-nie-bedzie-juz-generalem_1041634.html",
+        "www.se.pl",
+        ("Mirosław Hermaszewski nie będzie już generałem. Jedyny Polak w "
+         "kosmosie straci stopień"),
+        """Już niedługo Mirosław Hermaszewski (77 l.) - jedyny Polak, który gościł w kosmosie, może stracić stopień generalski. Wszystko za sprawą nowych przepisów autorstwa PiS, na mocy których członkowie Wojskowej Rady Ocalenia Narodowego mają zostać zdegradowani do stopnia szeregowców. - Nie będę komentował głupich pomysłów! - mówi nam Hermaszewski.
+
+27 czerwca 1978 r. Mirosław Hermaszewski jako pierwszy i jak dotąd jedyny Polak poleciał w kosmos statkiem Sojuz-30. Trzy lata później, 13 grudnia 1981 r., podpułkownik Hermaszewski, obok m.in. gen. Wojciecha Jaruzelskiego (+91 l.) i gen. Czesława Kiszczaka (+90 l.) zasiadł w Wojskowej Radzie Ocalenia Narodowego (WRON). - Z telewizji dowiedziałem się, że powstała WRON i ja jestem w jej składzie. Żadnych decyzji nie podejmowałem, zresztą rada nie podejmowała żadnych decyzji - mówił kilka lat temu Hermaszewski. Tymczasem PiS przygotowuje projekt ustawy, która umożliwi degradację m.in. autorów stanu wojennego.
+
+- Wszyscy członkowie Wojskowej Rady Ocalenia Narodowego zgodnie z projektem ustawy zostaną zdegradowani do stopnia szeregowca - ujawnił w rozmowie z "SE" Michał Dworczyk (43 l.), szef KPRM. Zapytany wprost o Hermaszewskiego - generała brygady w stanie spoczynku - potwierdził, że także on zostanie pozbawiony stopnia generalskiego.
+
+Co na to gen. Hermaszewski? - Nie będę komentował głupich pomysłów! - uciął. Smaczku całej sprawie dodaje to, że zięciem kosmonauty jest jeden z bardziej znanych polityków PiS, europoseł Ryszard Czarnecki (55 l.). Chcieliśmy poprosić go wczoraj o komentarz, ale przerwał rozmowę, twierdząc, że przebywa obecnie w Stanach Zjednoczonych.
+
+Wczoraj projektem ustawy zajmował się Komitet Stały Rady Ministrów. Przepisy mają wejść w życie już w marcu.""",
+        date(year=2018, month=2, day=23),
+        [],
+        ["SR"])
     ]
 
 class TestDownload(unittest.TestCase):
