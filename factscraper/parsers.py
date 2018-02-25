@@ -16,7 +16,7 @@ class GenericParser:
     possible. All other parsers extend it.
     """
     ### For the time being this is a copy of FaktyInteriaParser ###
-    domain = None
+    domains = []
 
     @classmethod
     def parse(cls, response):
@@ -79,7 +79,7 @@ class GenericParser:
 
 class FaktyInteriaParser(GenericParser):
     """Parser that works on fakty.interia.pl"""
-    domain = 'fakty.interia.pl'
+    domains = ['fakty.interia.pl']
 
     @classmethod
     def parse_title(cls, response):
@@ -129,6 +129,8 @@ class FaktyInteriaParser(GenericParser):
             return [author]
         return []
 
+    ### ### Parser choice ### ###
+
 def _is_parser(obj):
     is_class = inspect.isclass(obj)
     if is_class:
@@ -138,8 +140,14 @@ def _is_parser(obj):
 _parser_collection = inspect.getmembers(
     sys.modules[__name__], _is_parser)
 
-parser_dict = {
-    parser_tuple[1].domain: parser_tuple[1] for parser_tuple in _parser_collection}
+parser_dict = {}
+for parser_tuple in _parser_collection:
+    for domain in parser_tuple[1].domains:
+        if domain not in parser_dict:
+            parser_dict[domain] = parser_tuple[1]
+        else:
+            raise ValueError("Domain {} already handled by {}".format(
+                domain, parser_dict[domain].__name__))
 
 def select_parser(url):
     """Selects the correct parser for a url based on its domain."""
