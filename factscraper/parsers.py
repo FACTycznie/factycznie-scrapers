@@ -112,7 +112,10 @@ class FaktyInteriaParser(GenericParser):
         sources = response.xpath(
             "//cite[@itemtype='http://schema.org/Organization']//@content"
         ).extract()
-        return sources
+        clean_sources = []
+        for source in sources:
+            clean_sources.extend(source.split("/"))
+        return clean_sources
     
     @classmethod
     def parse_authors(cls, response):
