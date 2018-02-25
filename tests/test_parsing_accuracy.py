@@ -47,7 +47,7 @@ class TestDownload(unittest.TestCase):
         self.assertIsInstance(
             download_result,
             scrapy.http.HtmlResponse)
-        self.assertIn(bytes("article"), download_result.body)
+        self.assertIn(bytes("article", 'utf-8'), download_result.body)
 
 
 # Download them now so we don't have to redownload them for each test
