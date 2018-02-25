@@ -16,10 +16,11 @@ MAXIMUM_AUTHOR_LINE_LENGTH = 50
 
 from factscraper import parsers, downloader
 
-def analyze_url(url, verbose=False):
+def analyze_url(url, verbose=False, parser=None):
     """Returns analysis results of an article with the given url."""
     response = downloader.download(url)
-    parser = parsers.select_parser(response.url)
+    if parser is None:
+        parser = parsers.select_parser(response.url)
     if verbose:
         print("Using parser", parser.__name__)
     parsed_article = parser.parse(response)
