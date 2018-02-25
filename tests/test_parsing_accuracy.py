@@ -1,3 +1,4 @@
+"""This file contains tests related to how we parse articles from websites."""
 import unittest
 import re
 
@@ -209,7 +210,91 @@ Co na to gen. Hermaszewski? - Nie będę komentował głupich pomysłów! - uci�
 Wczoraj projektem ustawy zajmował się Komitet Stały Rady Ministrów. Przepisy mają wejść w życie już w marcu.""",
         date(year=2018, month=2, day=23),
         [],
-        ["SR"])
+        ["SR"]),
+    _TestArticle(
+        "https://wroclaw.onet.pl/tragiczny-wypadek-we-wroclawiu-nie-zyje-mezczyzna/v3kvx88",
+        "https://wroclaw.onet.pl/tragiczny-wypadek-we-wroclawiu-nie-zyje-mezczyzna/v3kvx88",
+        "wroclaw.onet.pl",
+        "Tragiczny wypadek we Wrocławiu. Nie żyje mężczyzna",
+        """Wczoraj, tuż przed północą, bmw uderzyło w drzewo we wrocławskiej
+        dzielnicy Swojczyce. Zginął jeden z pasażerów siedzących w aucie. Dwie
+        inne osoby uciekły. Zatrzymano Ukraińca, który prawdopodobnie prowadził
+        samochód. 
+        Jak czytamy na "Gazecie Wrocławskiej", wypadek wydarzył się w pobliżu
+        skrzyżowania ul. Kowalskiej i Mydlanej. Najpierw auto wypadło z jezdni,
+        a następnie odbiło się od drzewa i rozpadło na dwie części.
+
+        Samochodem jechały cztery osoby. Na miejscu zginęła jedna z nich. To mężczyzna
+        w wieku ok. 40 lat. Policja zatrzymała Ukraińca, który
+        najprawdopodobniej kierował pojazdem. Ma obrażenia głowy. Policja
+        poszukuje dwóch pasażerów auta. Jeden z nich uciekł przed przyjazdem
+        służb, a kolejny zbiegł podczas akcji ratunkowej.""",
+        date(year=2018, month=2, day=25),
+        ['Gazeta Wrocławska'],
+        []),
+    _TestArticle(
+        "http://wiadomosci.gazeta.pl/wiadomosci/7,114883,23069152,lodzcy-straznicy-zabrali-kobiete-do-izby-wytrzezwien-nie-byla.html#Z_Czolka3Img",
+        "http://wiadomosci.gazeta.pl/wiadomosci/7,114883,23069152,lodzcy-straznicy-zabrali-kobiete-do-izby-wytrzezwien-nie-byla.html",
+        "wiadomosci.gazeta.pl",
+        ("Uznali, że jest pijana i zawieźli na izbę wytrzeźwień. Nie była, a "
+         "miała tylko 27 stopni. Zamarzła"),
+        """Gdy znaleziona na ulicy w Łodzi kobieta trafiła do szpitala,
+        temperatura jej ciała wynosiła 27 stopni Celsjusza. Wcześniej strażnicy
+        miejscy uznali, że jest pijana i zawieźli ją na izbę wytrzeźwień.
+        Kobieta zmarła w szpitalu.
+
+        Strażnicy miejscy znaleźli kobietę w piątek rano przy skrzyżowaniu w
+        centrum Łodzi. Leżała nieprzytomna na chodniku. Nie miała przy sobie
+        dokumentów - opisuje łódzka policja. Funkcjonariusze nie wezwali
+        pogotowia. Podejrzewali, że jest pijana i zawieźli ja do izby
+        wytrzeźwień.
+
+        Tam doszło do zatrzymania akcji serca. Udało się ją reanimować i zabrać
+        do szpitala. Na oddziale ratunkowym okazało się, że jest skrajnie
+        wychłodzona - temperatura jej ciała wynosiła 27 stopni Celsjusza. Wbrew
+        podejrzeniom strażników nie była pijana, co wykazało badanie krwi.
+
+        Lekarze walczyli o nią kilkanaście godzin. Udało się doprowadzić
+        organizm kobiety do prawie normalnej temperatury. Jednak w nocy z
+        piątku na sobotę jej serce zatrzymało się po raz kolejny. Tym razem
+        reanimacja nie przyniosła skutków i kobieta zmarła. Za prawdopodobną
+        przyczynę zgonu uznano wychłodzenie. 
+
+        Wyjaśnieniem sprawy zajmie się policja i prokuratura. Zabezpieczono
+        dokumentację związana z interwencją straży miejskiej.  Tej zimy 46 osób
+        zmarło z wychłodzenia 
+
+        Kobieta była drugą ofiarą zimna w ciągu ostatniej doby - poinformowało
+        Rządowe Centrum Bezpieczeństwa. Do drugiej śmierci doszło w
+        województwie warmińsko-mazurskim. Liczba ofiar mrozów w tym sezonie
+        zimowym wzrosła w ten sposób do 46 - powiedziała IAR rzeczniczka RCB
+        Anna Adamkiewicz.
+
+        RCB podkreśla, że silne mrozy panują jednak w całym kraju i apeluje o
+        pomoc osobom najbardziej narażonym na jego skutki. - Jeżeli wiemy o
+        osobach, które mogą potrzebować pomocy - warto zadzwonić pod numer
+        alarmowy 112. Służby przyjadą i pomogą - zapewniła Anna Adamkiewicz.
+
+        Obecnie Polska znajduje się na skraju wyżu z centrum nad Skandynawią. Z
+        północnego wschodu napływa mroźna i sucha, arktyczna masa powietrza.
+
+        Policja apeluje:
+
+        Temperatura w nocy spada do kilkunastu stopni poniżej zera. Długotrwałe
+        przebywanie w takich warunkach stanowi zagrożenie dla zdrowia i życia.
+        W tej sytuacji osoby starsze, schorowane oraz małe dzieci powinny
+        skrócić czas pobytu na dworze do niezbędnego minimum. Policjanci proszą
+        także o zwracanie uwagi na osoby nietrzeźwe lub bezdomne śpiące na
+        przystankach, ławkach bądź w nieogrzewanych pomieszczeniach (altanki
+        działkowe, pustostany). Widząc taką osobę należy powiadomić policję,
+        straż miejską lub inną służbę ratunkową. Taki telefon może uratować
+        czyjeś życie. Przy tak niskich temperaturach nawet w pomieszczeniach
+        może dojść do wychłodzenia, jeśli nie ma tam odpowiedniego ogrzewania.
+        Jeśli mamy wiedzę o osobach nieporadnych mieszkających w pobliżu,
+        należy zawiadomić o tym służby ratunkowe.""",
+        date(year=2018, month=2, day=25),
+        [], # Łódzka Policja
+        [])
     ]
 
 class TestDownload(unittest.TestCase):
@@ -229,11 +314,7 @@ class TestArticleDetection(unittest.TestCase):
     contains an article.
     """
     def setUp(self):
-        self.correct_urls = [
-            "https://wroclaw.onet.pl/tragiczny-wypadek-we-wroclawiu-nie-zyje-mezczyzna/v3kvx88",
-            "https://wiadomosci.onet.pl/swiat/francja-od-stycznia-udaremniono-dwa-ataki-terrorystyczne/gd12e97a",
-            "http://www.se.pl/wiadomosci/polityka/zabiora-kosmonaucie-gwiazdy-miroslaw-hermaszewski-nie-bedzie-juz-generalem_1041634.html",
-            "http://wiadomosci.gazeta.pl/wiadomosci/7,114883,23069152,lodzcy-straznicy-zabrali-kobiete-do-izby-wytrzezwien-nie-byla.html#Z_Czolka3Img"]
+        self.correct_urls = [article.initial_url for article in test_articles]
         self.invalid_urls = [
             "http://wiadomosci.gazeta.pl/wiadomosci/0,156046.html#TRNavSST",
             "http://weekend.gazeta.pl/weekend/0,0.html",
@@ -247,21 +328,23 @@ class TestArticleDetection(unittest.TestCase):
     def test_correct_urls(self):
         # This only tests whether or not 
         for url in self.correct_urls:
-            try:
-                analyze_url(url)
-            except InvalidArticleError:
-                self.fail("analyze_url raised InvalidArticleError on an "
-                          "actual article. url: {}".format(url))
+            with self.subTest(url=url):
+                try:
+                    analyze_url(url)
+                except InvalidArticleError:
+                    self.fail("analyze_url raised InvalidArticleError on an "
+                              "actual article. url: {}".format(url))
 
     def test_invalid_urls(self):
         # This only tests whether or not 
         for url in self.invalid_urls:
-            try:
-                analyze_url(url)
-                self.fail("analyze_url detected an article where there "
-                          "was none. url: {}".format(url))
-            except InvalidArticleError:
-                pass
+            with self.subTest(url=url):
+                try:
+                    analyze_url(url)
+                    self.fail("analyze_url detected an article where there "
+                              "was none. url: {}".format(url))
+                except InvalidArticleError:
+                    pass
 
 # Download them now so we don't have to redownload them for each test
 _downloaded_articles = []
@@ -281,8 +364,9 @@ class TestGeneralAnalysis(unittest.TestCase):
 
     def _check_all(self, function):
         for analyzed, desired in zip(self.articles, test_articles):
-            function(analyzed, desired, 
-                     msg="\nError when analyzing {}".format(desired.initial_url))
+            with self.subTest(url=desired.initial_url):
+                function(analyzed, desired, 
+                         msg="\nError when analyzing {}".format(desired.initial_url))
     
     def test_clean_url(self):
         self._check_all(
