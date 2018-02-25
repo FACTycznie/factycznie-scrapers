@@ -92,7 +92,7 @@ class FaktyInteriaParser(GenericParser):
 
     @classmethod
     def parse_text(cls, response):
-        text = join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()"))
+        text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
         return text
 
     @classmethod
@@ -126,11 +126,17 @@ class FaktyInteriaParser(GenericParser):
             return [author]
         return None
 
+def _is_parser(obj):
+    is_class = inspect.isclass(obj)
+    if is_class:
+        return issubclass(obj, GenericParser)
+    return False
+
 parser_collection = inspect.getmembers(
-    sys.modules[__name__], lambda member: isinstance(member, GenericParser))
+    sys.modules[__name__], _is_parser)
 
 parser_dict = {
-    parser.domain: parser for parser in parser_collection}
+    parser_tuple[1].domain: parser_tuple[1] for parser_tuple in parser_collection}
 
 def select_parser(url):
     domain = get_domain(url)
