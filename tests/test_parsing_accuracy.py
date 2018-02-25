@@ -192,7 +192,6 @@ test_articles = [
         # "C-News", "Les Echos"] or even ["Francuskie MSW"] but it's
         # too difficult to retrieve for now
         [])
-
     ]
 
 class TestDownload(unittest.TestCase):
@@ -234,13 +233,17 @@ class TestArticleDetection(unittest.TestCase):
                 analyze_url(url)
             except InvalidArticleError:
                 self.fail("analyze_url raised InvalidArticleError on an "
-                          "actual article.")
+                          "actual article. url: {}".format(url))
 
     def test_invalid_urls(self):
         # This only tests whether or not 
         for url in self.invalid_urls:
-            self.assertRaises(InvalidArticleError, analyze_url, url)
-
+            try:
+                analyze_url(url)
+                self.fail("analyze_url detected an article where there "
+                          "was none. url: {}".format(url))
+            except InvalidArticleError:
+                pass
 
 # Download them now so we don't have to redownload them for each test
 _downloaded_articles = []

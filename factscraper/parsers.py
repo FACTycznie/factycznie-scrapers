@@ -84,10 +84,11 @@ class FaktyInteriaParser(GenericParser):
     @classmethod
     def parse_title(cls, response):
         title_str = response.xpath(
-            "/html/body/div/div/div/article/header/div/h1/text()"
+            "normalize-space(/html/body/div/div/div/article/header/div/h1/text())"
         ).extract_first()
         if title_str is not None:
-            return title_str.strip() 
+            # Fix zero width spaces
+            return title_str.strip().replace('\u200b', '')
         return None
 
     @classmethod
