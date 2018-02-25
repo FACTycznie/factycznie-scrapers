@@ -4,7 +4,7 @@ import re
 import scrapy
 from datetime import date
 
-from factscraper import analyze_url, downloader
+from factscraper import analyze_url, downloader, InvalidArticleError
 
 class _TestArticle:
     def __init__(self, initial_url, clean_url, domain, title, text, 
@@ -189,7 +189,7 @@ test_articles = [
         Francji w 2017 roku udaremniono dwadzieścia ataków terrorystycznych.""",
         date(year=2018, month=2, day=25),
         [], # Actually this should be ["Gerard Collomb"] or ["Europe 1",
-        # "C-News" and "Les Echos"] or even ["Francuskie MSW"] but it's
+        # "C-News", "Les Echos"] or even ["Francuskie MSW"] but it's
         # too difficult to retrieve for now
         [])
 
@@ -206,6 +206,40 @@ class TestDownload(unittest.TestCase):
             download_result,
             scrapy.http.HtmlResponse)
         self.assertIn(bytes("article", 'utf-8'), download_result.body)
+
+class TestArticleDetection(unittest.TestCase):
+    """This test case checks how accurately we can detect if a webpage
+    contains an article.
+    """
+    def setUp(self):
+        self.correct_urls = [
+            "https://wroclaw.onet.pl/tragiczny-wypadek-we-wroclawiu-nie-zyje-mezczyzna/v3kvx88",
+            "https://wiadomosci.onet.pl/swiat/francja-od-stycznia-udaremniono-dwa-ataki-terrorystyczne/gd12e97a",
+            "http://www.se.pl/wiadomosci/polityka/zabiora-kosmonaucie-gwiazdy-miroslaw-hermaszewski-nie-bedzie-juz-generalem_1041634.html",
+            "http://wiadomosci.gazeta.pl/wiadomosci/7,114883,23069152,lodzcy-straznicy-zabrali-kobiete-do-izby-wytrzezwien-nie-byla.html#Z_Czolka3Img"]
+        self.invalid_urls = [
+            "http://wiadomosci.gazeta.pl/wiadomosci/0,156046.html#TRNavSST",
+            "http://weekend.gazeta.pl/weekend/0,0.html",
+            "http://fakty.interia.pl/opinie",
+            "http://firma.interia.pl/regulamin",
+            "http://fakty.interia.pl/inne-serwisy",
+            "https://wp.pl/",
+            "http://kultura.gazeta.pl/kultura/56,114526,22658501,najlepsze-koncerty-wystawy-i-wydarzenia-z-calej-polski-tym.html",
+        ]
+
+    def test_correct_urls(self):
+        # This only tests whether or not 
+        for url in self.correct_urls:
+            try:
+                analyze_url(url)
+            except InvalidArticleError:
+                self.fail("analyze_url raised InvalidArticleError on an "
+                          "actual article.")
+
+    def test_invalid_urls(self):
+        # This only tests whether or not 
+        for url in self.invalid_urls:
+            self.assertRaises(InvalidArticleError, analyze_url, url)
 
 
 # Download them now so we don't have to redownload them for each test
