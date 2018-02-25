@@ -54,7 +54,7 @@ class GenericParser:
             "/html/body/div/div/div/article/div/div/div/a/text()").re(
                 '[0-9].*?(?=\s{2})')
         if len(date_strings) > 0:
-            article_date = dateparser.parse(date_strings[0])
+            article_date = dateparser.parse(date_strings[0]).date()
             return article_date
         return None
 
@@ -75,7 +75,7 @@ class GenericParser:
         if len(capitalized_word_pairs) >= 1 and len(last_sentence) < MAXIMUM_AUTHOR_LINE_LENGTH:
             author = " ".join(capitalized_word_pairs[-1])
             return [author]
-        return None
+        return []
 
 class FaktyInteriaParser(GenericParser):
     """Parser that works on fakty.interia.pl"""
@@ -103,7 +103,7 @@ class FaktyInteriaParser(GenericParser):
             "/html/body/div/div/div/article/div/div/div/a/text()").re(
                 '[0-9].*?(?=\s{2})')
         if len(date_strings) > 0:
-            article_date = dateparser.parse(date_strings[0])
+            article_date = dateparser.parse(date_strings[0]).date()
             return article_date
         return None
 
@@ -124,7 +124,7 @@ class FaktyInteriaParser(GenericParser):
         if len(capitalized_word_pairs) >= 1 and len(last_sentence) < MAXIMUM_AUTHOR_LINE_LENGTH:
             author = " ".join(capitalized_word_pairs[-1])
             return [author]
-        return None
+        return []
 
 def _is_parser(obj):
     is_class = inspect.isclass(obj)
