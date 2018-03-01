@@ -9,8 +9,14 @@ import json
 
 import scrapy
 from datetime import date, datetime
+import editdistance
 
 from factscraper import analyze_url, InvalidArticleError
+
+# Maximum ratio of Levenshtein distance between article text parsing
+# result and the original to the original's length for us to consider
+# the test passed
+ARTICLE_TEXT_EDIT_DISTANCE_THRESHOLD = 0.05
 
 #
 ###  Loading groundtruth test articles ###
@@ -103,9 +109,10 @@ class TestGeneralAnalysis(unittest.TestCase):
                 analyzed['title'], desired['title'], msg))
     
     def _check_text_equality(self, analyzed, desired, msg):
-        analyzed_set = set(re.findall("[A-Za-z0-9]+", analyzed['text']))
-        desired_set = set(re.findall("[A-Za-z0-9]+", desired['text']))
-        self.assertSetEqual(analyzed_set, desired_set, msg)
+        levenshtein_distance = editdistance.eval(analyzed['text'],
+                                                 desired['text'])
+        ratio = levenshtein_distance / len(desired['text'])
+        self.assertLess(ratio, ARTICLE_TEXT_EDIT_DISTANCE_THRESHOLD, msg=msg)
 
     def test_text(self):
         self._check_all(self._check_text_equality)
