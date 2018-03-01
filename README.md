@@ -1,3 +1,6 @@
+#### Branch note
+The goal of this branch is the creation of a reasonable storage for test articles.
+
 # factscraper
 This repository contains scrapers used by **FACTycznie.pl** to update its news database.
 
