@@ -1,15 +1,26 @@
-"""This file contains tests related to how we parse articles from websites."""
+"""This file contains tests that check how well our parsers retrieve
+information from articles.
+"""
 import os
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-
 import unittest
 import re
 import json
 
 import scrapy
 from datetime import date, datetime
+import editdistance
 
-from factscraper import analyze_url, downloader, InvalidArticleError
+from factscraper import analyze_url, InvalidArticleError
+
+# Maximum ratio of Levenshtein distance between article text parsing
+# result and the original to the original's length for us to consider
+# the test passed
+ARTICLE_TEXT_EDIT_DISTANCE_THRESHOLD = 0.05
+
+#
+###  Loading groundtruth test articles ###
+#
 
 test_articles = []
 try:
@@ -25,17 +36,20 @@ except FileNotFoundError:
     raise FileNotFoundError(("test_articles.jsonl file not found. Please "
                              "create it with add_test_article.py script."))
 
-class TestDownload(unittest.TestCase):
-    """This test case checks if `factscraper.downloader` works."""
-    def setUp(self):
-        self.test_url = "https://wroclaw.onet.pl/tragiczny-wypadek-we-wroclawiu-nie-zyje-mezczyzna/v3kvx88"
+#
+###  Downloading all test samples from the wild ###
+#
 
-    def test_download(self):
-        download_result = downloader.download(self.test_url)
-        self.assertIsInstance(
-            download_result,
-            scrapy.http.HtmlResponse)
-        self.assertIn(bytes("article", 'utf-8'), download_result.body)
+_downloaded_articles = []
+for test_article in test_articles:
+    try:
+        _downloaded_articles.append(analyze_url(test_article['url']))
+    except InvalidArticleError:
+        pass
+
+#
+###  Testing stuff ###
+#
 
 class TestArticleDetection(unittest.TestCase):
     """This test case checks how accurately we can detect if a webpage
@@ -54,7 +68,7 @@ class TestArticleDetection(unittest.TestCase):
         ]
 
     def test_correct_urls(self):
-        # This only tests whether or not 
+        """This tests for false negatives."""
         for url in self.correct_urls:
             with self.subTest(url=url):
                 try:
@@ -64,7 +78,7 @@ class TestArticleDetection(unittest.TestCase):
                               "actual article. url: {}".format(url))
 
     def test_invalid_urls(self):
-        # This only tests whether or not 
+        """This tests for false positives."""
         for url in self.invalid_urls:
             with self.subTest(url=url):
                 try:
@@ -73,14 +87,6 @@ class TestArticleDetection(unittest.TestCase):
                               "was none. url: {}".format(url))
                 except InvalidArticleError:
                     pass
-
-# Download them now so we don't have to redownload them for each test
-_downloaded_articles = []
-for test_article in test_articles:
-    try:
-        _downloaded_articles.append(analyze_url(test_article['url']))
-    except InvalidArticleError:
-        pass
 
 class TestGeneralAnalysis(unittest.TestCase):
     """This test case downloads and analyzes all articles from
@@ -91,6 +97,7 @@ class TestGeneralAnalysis(unittest.TestCase):
         self.articles = _downloaded_articles
 
     def _check_all(self, function):
+        """This helper method runs a given assert function on all articles."""
         for analyzed, desired in zip(self.articles, test_articles):
             with self.subTest(url=desired['url']):
                 function(analyzed, desired, 
@@ -102,9 +109,10 @@ class TestGeneralAnalysis(unittest.TestCase):
                 analyzed['title'], desired['title'], msg))
     
     def _check_text_equality(self, analyzed, desired, msg):
-        analyzed_set = set(re.findall("[A-Za-z0-9]+", analyzed['text']))
-        desired_set = set(re.findall("[A-Za-z0-9]+", desired['text']))
-        self.assertSetEqual(analyzed_set, desired_set, msg)
+        levenshtein_distance = editdistance.eval(analyzed['text'],
+                                                 desired['text'])
+        ratio = levenshtein_distance / len(desired['text'])
+        self.assertLess(ratio, ARTICLE_TEXT_EDIT_DISTANCE_THRESHOLD, msg=msg)
 
     def test_text(self):
         self._check_all(self._check_text_equality)
