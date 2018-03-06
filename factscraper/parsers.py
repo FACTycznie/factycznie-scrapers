@@ -50,11 +50,8 @@ class GenericParser:
 
     @classmethod
     def parse_date(cls, response):
-        date_strings = response.xpath(
-            "/html/body/div/div/div/article/div/div/div/a/text()").re(
-                '[0-9].*?(?=\s{2})')
+        date_strings = response.xpath("//meta[@property='article:published_time']/@content").extract()
         if len(date_strings) > 0:
-            print(article_date)
             article_date = dateparser.parse(date_strings[0]).date()
             return article_date
         return None
@@ -138,7 +135,7 @@ class WiadomosciOnetParser(GenericParser):
     @classmethod
     def parse_title(cls, response):
         title_str = response.xpath(
-            "normalize-space(/html/body/div/div/div/article/header/div/h1/text())"
+            "normalize-space(//h1[@class='mainTitle']/text())"
         ).extract_first()
         if title_str is not None:
             # Fix zero width spaces
@@ -151,26 +148,9 @@ class WiadomosciOnetParser(GenericParser):
         return text
 
     @classmethod
-    def parse_date(cls, response):
-        # regex below looks for a number in the timestamp (day) and grabs
-        # everything until a giant blob of whitespace
-        date_strings = response.xpath(
-            "/html/body/div/div/div/article/div/div/div/a/text()").re(
-                '[0-9].*?(?=\s{2})')
-        if len(date_strings) > 0:
-            article_date = dateparser.parse(date_strings[0]).date()
-            return article_date
-        return None
-
-    @classmethod
     def parse_sources(cls, response):
-        sources = response.xpath(
-            "//cite[@itemtype='http://schema.org/Organization']//@content"
-        ).extract()
-        clean_sources = []
-        for source in sources:
-            clean_sources.extend(source.split("/"))
-        return clean_sources
+        sources = response.xpath("//span[@itemprop='sourceOrganization']//span[@itemprop='name']/text()").extract()
+        return sources
     
     @classmethod
     def parse_authors(cls, response):
