@@ -10,6 +10,7 @@ import json
 import scrapy
 from datetime import date, datetime
 import editdistance
+import dateparser
 
 from factscraper import analyze_url, InvalidArticleError
 
@@ -45,7 +46,7 @@ for test_article in test_articles:
     try:
         _downloaded_articles.append(analyze_url(test_article['url']))
     except InvalidArticleError:
-        pass
+        _downloaded_articles.append(None)
 
 #
 ###  Testing stuff ###
@@ -100,9 +101,11 @@ class TestGeneralAnalysis(unittest.TestCase):
         """This helper method runs a given assert function on all articles."""
         for analyzed, desired in zip(self.articles, test_articles):
             with self.subTest(url=desired['url']):
+                if analyzed is None:
+                    self.skipTest("Skipping empty article: "+desired['url'])
                 function(analyzed, desired, 
                          msg="\nError when analyzing {}".format(desired['url']))
-    
+        
     def test_title(self):
         self._check_all(
             lambda analyzed, desired, msg: self.assertEqual(
@@ -120,7 +123,8 @@ class TestGeneralAnalysis(unittest.TestCase):
     def test_date(self):
         self._check_all(
             lambda analyzed, desired, msg: self.assertEqual(
-                analyzed['publish_date'], desired['publish_date'], msg))
+                analyzed['publish_date'],
+                dateparser.parse(desired['publish_date']).date(), msg))
 
     def test_sources(self):
         self._check_all(
