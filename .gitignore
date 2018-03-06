@@ -10,5 +10,8 @@ __pycache__
 # virtualenv
 .venv
 
+# test articles
+tests/test_articles.jsonl
+
 # articles downloaded
 articles
