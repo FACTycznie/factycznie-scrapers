@@ -54,6 +54,7 @@ class GenericParser:
             "/html/body/div/div/div/article/div/div/div/a/text()").re(
                 '[0-9].*?(?=\s{2})')
         if len(date_strings) > 0:
+            print(article_date)
             article_date = dateparser.parse(date_strings[0]).date()
             return article_date
         return None
@@ -94,6 +95,59 @@ class FaktyInteriaParser(GenericParser):
     @classmethod
     def parse_text(cls, response):
         text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
+        return text
+
+    @classmethod
+    def parse_date(cls, response):
+        # regex below looks for a number in the timestamp (day) and grabs
+        # everything until a giant blob of whitespace
+        date_strings = response.xpath(
+            "/html/body/div/div/div/article/div/div/div/a/text()").re(
+                '[0-9].*?(?=\s{2})')
+        if len(date_strings) > 0:
+            article_date = dateparser.parse(date_strings[0]).date()
+            return article_date
+        return None
+
+    @classmethod
+    def parse_sources(cls, response):
+        sources = response.xpath(
+            "//cite[@itemtype='http://schema.org/Organization']//@content"
+        ).extract()
+        clean_sources = []
+        for source in sources:
+            clean_sources.extend(source.split("/"))
+        return clean_sources
+    
+    @classmethod
+    def parse_authors(cls, response):
+        text = cls.parse_text(response)
+        last_sentence = re.split("[.!?]", text)[-1]
+        capitalized_word_pairs = re.findall(
+            "(?:([A-Z][a-z]*)\ ([A-Z][a-z]*))", 
+            last_sentence)
+        if len(capitalized_word_pairs) >= 1 and len(last_sentence) < MAXIMUM_AUTHOR_LINE_LENGTH:
+            author = " ".join(capitalized_word_pairs[-1])
+            return [author]
+        return []
+
+class WiadomosciOnetParser(GenericParser):
+    """Parser that works on wiadomosci.onet.pl"""
+    domains = ['wiadomosci.onet.pl']
+
+    @classmethod
+    def parse_title(cls, response):
+        title_str = response.xpath(
+            "normalize-space(/html/body/div/div/div/article/header/div/h1/text())"
+        ).extract_first()
+        if title_str is not None:
+            # Fix zero width spaces
+            return title_str.strip().replace('\u200b', '')
+        return None
+
+    @classmethod
+    def parse_text(cls, response):
+        text = response.xpath("normalize-space(//div/article//div[@class='whitelistPremium'])").extract()[0]
         return text
 
     @classmethod
