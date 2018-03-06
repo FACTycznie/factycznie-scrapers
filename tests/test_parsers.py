@@ -109,7 +109,7 @@ class TestGeneralAnalysis(unittest.TestCase):
     def test_title(self):
         self._check_all(
             lambda analyzed, desired, msg: self.assertEqual(
-                analyzed['title'], desired['title'], msg))
+                analyzed['title'], desired['title'].strip(), msg))
     
     def _check_text_equality(self, analyzed, desired, msg):
         levenshtein_distance = editdistance.eval(analyzed['text'],
