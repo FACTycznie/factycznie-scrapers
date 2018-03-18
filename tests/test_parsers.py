@@ -11,6 +11,7 @@ import scrapy
 from datetime import date, datetime
 import editdistance
 import dateparser
+import requests
 
 from factscraper import analyze_url, InvalidArticleError
 
@@ -47,6 +48,9 @@ for test_article in test_articles:
         _downloaded_articles.append(analyze_url(test_article['url']))
     except InvalidArticleError:
         _downloaded_articles.append(None)
+    except requests.exceptions.ConnectionError:
+        _downloaded_articles.append(None)
+        print("Error: Could not connect to ",test_article['url'])
 
 #
 ###  Testing stuff ###
