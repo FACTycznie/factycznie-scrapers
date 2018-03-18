@@ -144,7 +144,9 @@ class WiadomosciOnetParser(GenericParser):
 
     @classmethod
     def parse_text(cls, response):
-        text = response.xpath("normalize-space(//div/article//div[@class='whitelistPremium'])").extract()[0]
+        article_lead = response.xpath("normalize-space(//div[@id='lead']/text())").extract()[0]
+        article_body = "\n".join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract())
+        text = article_lead + "\n" + article_body
         return text
 
     @classmethod
