@@ -45,7 +45,11 @@ class GenericParser:
 
     @classmethod
     def parse_text(cls, response):
-        text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
+        article_lead = "\n".join(response.xpath("//div[contains(@id, 'lead')][contains(@id, 'article')]/text()").extract())
+        article_body = "\n".join(response.xpath("normalize-space(//div[contains(@id, 'body')][contains(@id, 'article')])").extract())
+        text = article_lead + "\n" + article_body
+        if len(text) < MINIMUM_ARTICLE_LENGTH:
+            text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
         return text
 
     @classmethod
