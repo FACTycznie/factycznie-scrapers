@@ -133,6 +133,19 @@ class WiadomosciOnetParser(GenericParser):
     domains = ['wiadomosci.onet.pl']
 
     @classmethod
+    def _parse_authors_from_text(cls, text):
+        """This method attempts to find authors from the last line of
+        the text. We use it if an initial search for the author fails.
+        """
+        lines = text.split("\n")
+        authors = []
+        if re.search("^\([a-zA-Z0-9]*\)$", lines[-1]):
+            authors = list(re.search("(?:\((.*)\))", lines[-1]).groups())
+            del lines[-1]
+        text = "\n".join(lines)
+        return authors, text
+
+    @classmethod
     def parse_title(cls, response):
         title_str = response.xpath(
             "normalize-space(//h1[@class='mainTitle']/text())"
@@ -143,10 +156,12 @@ class WiadomosciOnetParser(GenericParser):
         return None
 
     @classmethod
-    def parse_text(cls, response):
+    def parse_text(cls, response, clean=True):
         article_lead = response.xpath("normalize-space(//div[@id='lead']/text())").extract()[0]
         article_body = "\n".join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract())
         text = article_lead + "\n" + article_body
+        if clean:
+            text = cls._parse_authors_from_text(text)[1]
         return text
 
     @classmethod
@@ -156,15 +171,11 @@ class WiadomosciOnetParser(GenericParser):
     
     @classmethod
     def parse_authors(cls, response):
-        text = cls.parse_text(response)
-        last_sentence = re.split("[.!?]", text)[-1]
-        capitalized_word_pairs = re.findall(
-            "(?:([A-Z][a-z]*)\ ([A-Z][a-z]*))", 
-            last_sentence)
-        if len(capitalized_word_pairs) >= 1 and len(last_sentence) < MAXIMUM_AUTHOR_LINE_LENGTH:
-            author = " ".join(capitalized_word_pairs[-1])
-            return [author]
-        return []
+        authors = response.xpath("//span[@itemprop='author']//span[@itemprop='name']/text()").extract()
+        if authors == []:
+            authors = cls._parse_authors_from_text(cls.parse_text(response,
+                                                                  clean=False))[0]
+        return authors
 
     ### ### Parser choice ### ###
 
