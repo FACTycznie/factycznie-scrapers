@@ -118,6 +118,14 @@ class SeParser(GenericParser):
         body = "\n".join(response.xpath("//div[@class='text-block']/p//text()").extract())
         return lead + body
 
+class NtInteriaParser(GenericParser):
+    domains = ['nt.interia.pl']
+
+    @classmethod
+    def parse_text(cls, response):
+        return "\n".join(response.xpath(
+            "//div[@class='article-body']/p/text()").extract())
+
     ### ### Parser choice ### ###
 
 def _is_parser(obj):
