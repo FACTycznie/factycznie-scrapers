@@ -25,9 +25,7 @@ class GenericParser:
             'domain': get_domain(response.url),
             'title': cls.parse_title(response),
             'text': cls.parse_text(response),
-            'publish_date': cls.parse_date(response),
-            'sources': cls.parse_sources(response),
-            'authors': cls.parse_authors(response)}
+            'publish_date': cls.parse_date(response)}
 
         if len(out_dict['text']) < MINIMUM_ARTICLE_LENGTH:
             raise InvalidArticleError("Article is too short")
@@ -59,26 +57,7 @@ class GenericParser:
             article_date = dateparser.parse(date_strings[0]).date()
             return article_date
         return None
-
-    @classmethod
-    def parse_sources(cls, response):
-        sources = response.xpath(
-            "//cite[@itemtype='http://schema.org/Organization']//@content"
-        ).extract()
-        return sources
     
-    @classmethod
-    def parse_authors(cls, response):
-        text = cls.parse_text(response)
-        last_sentence = re.split("[.!?]", text)[-1]
-        capitalized_word_pairs = re.findall(
-            "(?:([A-Z][a-z]*)\ ([A-Z][a-z]*))", 
-            last_sentence)
-        if len(capitalized_word_pairs) >= 1 and len(last_sentence) < MAXIMUM_AUTHOR_LINE_LENGTH:
-            author = " ".join(capitalized_word_pairs[-1])
-            return [author]
-        return []
-
 class FaktyInteriaParser(GenericParser):
     """Parser that works on fakty.interia.pl"""
     domains = ['fakty.interia.pl']
@@ -110,44 +89,9 @@ class FaktyInteriaParser(GenericParser):
             return article_date
         return None
 
-    @classmethod
-    def parse_sources(cls, response):
-        sources = response.xpath(
-            "//cite[@itemtype='http://schema.org/Organization']//@content"
-        ).extract()
-        clean_sources = []
-        for source in sources:
-            clean_sources.extend(source.split("/"))
-        return clean_sources
-    
-    @classmethod
-    def parse_authors(cls, response):
-        text = cls.parse_text(response)
-        last_sentence = re.split("[.!?]", text)[-1]
-        capitalized_word_pairs = re.findall(
-            "(?:([A-Z][a-z]*)\ ([A-Z][a-z]*))", 
-            last_sentence)
-        if len(capitalized_word_pairs) >= 1 and len(last_sentence) < MAXIMUM_AUTHOR_LINE_LENGTH:
-            author = " ".join(capitalized_word_pairs[-1])
-            return [author]
-        return []
-
 class WiadomosciOnetParser(GenericParser):
     """Parser that works on wiadomosci.onet.pl"""
     domains = ['wiadomosci.onet.pl']
-
-    @classmethod
-    def _parse_authors_from_text(cls, text):
-        """This method attempts to find authors from the last line of
-        the text. We use it if an initial search for the author fails.
-        """
-        lines = text.split("\n")
-        authors = []
-        if re.search("^\([a-zA-Z0-9]*\)$", lines[-1]):
-            authors = list(re.search("(?:\((.*)\))", lines[-1]).groups())
-            del lines[-1]
-        text = "\n".join(lines)
-        return authors, text
 
     @classmethod
     def parse_title(cls, response):
@@ -160,26 +104,11 @@ class WiadomosciOnetParser(GenericParser):
         return None
 
     @classmethod
-    def parse_text(cls, response, clean=True):
+    def parse_text(cls, response):
         article_lead = response.xpath("normalize-space(//div[@id='lead']/text())").extract()[0]
         article_body = "\n".join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract())
         text = article_lead + "\n" + article_body
-        if clean:
-            text = cls._parse_authors_from_text(text)[1]
         return text
-
-    @classmethod
-    def parse_sources(cls, response):
-        sources = response.xpath("//span[@itemprop='sourceOrganization']//span[@itemprop='name']/text()").extract()
-        return sources
-    
-    @classmethod
-    def parse_authors(cls, response):
-        authors = response.xpath("//span[@itemprop='author']//span[@itemprop='name']/text()").extract()
-        if authors == []:
-            authors = cls._parse_authors_from_text(cls.parse_text(response,
-                                                                  clean=False))[0]
-        return authors
 
     ### ### Parser choice ### ###
 
