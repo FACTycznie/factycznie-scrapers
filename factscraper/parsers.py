@@ -116,6 +116,14 @@ class WiadomosciGazetaParser(GenericParser):
     domains = ['wiadomosci.gazeta.pl']
 
     @classmethod
+    def parse_title(cls, response):
+        try:
+            return response.xpath(
+                "//div[@id='content']//h1/text()").extract_first().strip()
+        except AttributeError:
+            pass
+
+    @classmethod
     def parse_date(cls, response):
         date_string = response.xpath(
             "//div[@id='gazeta_article_date']//time/@datetime").extract_first()
