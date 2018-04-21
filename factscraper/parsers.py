@@ -11,6 +11,13 @@ import re
 from factscraper import InvalidArticleError, MINIMUM_ARTICLE_LENGTH
 from factscraper.util import clean_url, get_domain
 
+def validate_article(article_dict):
+    """Checks whether a parsed article dict is valid, and returns an
+    exception if it isn't.
+    """
+    if len(article_dict['text']) < MINIMUM_ARTICLE_LENGTH:
+        return InvalidArticleError("Article is too short")
+
 class GenericParser:
     """Generic parser that is designed to work on as many sites as
     possible. All other parsers extend it.
@@ -19,17 +26,17 @@ class GenericParser:
     domains = []
 
     @classmethod
-    def parse(cls, response):
+    def parse(cls, response, validate=True):
         out_dict = {
             'url': clean_url(response.url),
             'domain': get_domain(response.url),
             'title': cls.parse_title(response),
             'text': cls.parse_text(response),
             'publish_date': cls.parse_date(response)}
-
-        if len(out_dict['text']) < MINIMUM_ARTICLE_LENGTH:
-            raise InvalidArticleError("Article is too short")
-
+        if validate:
+            invalid_article_exception = validate_article(out_dict)
+            if invalid_article_exception is not None:
+                raise invalid_article_exception
         return out_dict
 
     @classmethod
