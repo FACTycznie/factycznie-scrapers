@@ -58,10 +58,15 @@ class GenericParser:
 
     @classmethod
     def parse_date(cls, response):
-        date_strings = response.xpath("//meta[@property='article:published_time']/@content").extract()
-        if len(date_strings) > 0:
-            article_date = dateparser.parse(date_strings[0]).date()
-            return article_date
+        date_string = response.xpath(
+            "//meta[@property='article:published_time']/@content").extract_first()
+        if date_string is None:
+            date_string = response.xpath(
+                "//meta[@itemprop='datePublished']/@content").extract_first()
+        try:
+            return dateparser.parse(date_string).date()
+        except TypeError:
+            pass
     
 class FaktyInteriaParser(GenericParser):
     """Parser that works on fakty.interia.pl"""
@@ -71,17 +76,6 @@ class FaktyInteriaParser(GenericParser):
     def parse_text(cls, response):
         text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
         return text
-
-    @classmethod
-    def parse_date(cls, response):
-        # regex below looks for a number in the timestamp (day) and grabs
-        # everything until a giant blob of whitespace
-        date_strings = response.xpath(
-            "/html/body/div/div/div/article/div/div/div/a/text()").re(
-                '[0-9].*?(?=\s{2})')
-        if len(date_strings) > 0:
-            article_date = dateparser.parse(date_strings[0]).date()
-            return article_date
 
 class WiadomosciOnetParser(GenericParser):
     """Parser that works on wiadomosci.onet.pl"""
