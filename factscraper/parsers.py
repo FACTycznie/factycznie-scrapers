@@ -8,7 +8,7 @@ import sys
 import dateparser
 import re
 
-from factscraper import InvalidArticleError, MINIMUM_ARTICLE_LENGTH, MAXIMUM_AUTHOR_LINE_LENGTH
+from factscraper import InvalidArticleError, MINIMUM_ARTICLE_LENGTH
 from factscraper.util import clean_url, get_domain
 
 class GenericParser:
