@@ -14,6 +14,7 @@ import dateparser
 import requests
 
 from factscraper import analyze_url, InvalidArticleError
+from factscraper.util import get_domain
 
 # Maximum ratio of Levenshtein distance between article text parsing
 # result and the original to the original's length for us to consider
@@ -33,7 +34,10 @@ try:
             article['publish_date'] = datetime.strptime(
                 article['publish_date'], "%Y-%m-%d")
             test_articles.append(json.loads(line))
-
+        print("Domains of articles to be tested: ")
+        for domain in set([get_domain(article['url']) 
+                           for article in test_articles]):
+            print(domain)
 except FileNotFoundError:
     raise FileNotFoundError(("test_articles.jsonl file not found. Please "
                              "create it with add_test_article.py script."))
