@@ -15,6 +15,15 @@ def validate_article(article_dict):
     """Checks whether a parsed article dict is valid, and returns an
     exception if it isn't.
     """
+    needed_attributes = ['title', 'text', 'publish_date', 'url', 'domain']
+    for attribute in needed_attributes:
+        if attribute not in article_dict:
+            return InvalidArticleError("Attribute {} not present".format(
+                                       attribute))
+    for attribute in ['title', 'text']:
+        if article_dict[attribute] is None:
+            return InvalidArticleError("Attribute {} is empty".format(
+                                       attribute))
     if len(article_dict['text']) < MINIMUM_ARTICLE_LENGTH:
         return InvalidArticleError("Article is too short")
 
