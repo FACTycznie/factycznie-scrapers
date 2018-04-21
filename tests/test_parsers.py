@@ -119,6 +119,8 @@ class TestGeneralAnalysis(unittest.TestCase):
     def _check_text_equality(self, analyzed, desired, msg):
         levenshtein_distance = editdistance.eval(analyzed['text'],
                                                  desired['text'])
+        msg += "\n\n\tDesired:\n" + desired['text']
+        msg += "\n\tActual:\n" + analyzed['text']
         ratio = levenshtein_distance / len(desired['text'])
         self.assertLess(ratio, ARTICLE_TEXT_EDIT_DISTANCE_THRESHOLD, msg=msg)
 
