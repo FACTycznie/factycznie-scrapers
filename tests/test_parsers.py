@@ -47,7 +47,8 @@ for test_article in test_articles:
     try:
         _downloaded_articles.append(analyze_url(test_article['url']))
     except InvalidArticleError:
-        _downloaded_articles.append(None)
+        _downloaded_articles.append(analyze_url(test_article['url'],
+                                                validate=False))
     except requests.exceptions.ConnectionError:
         _downloaded_articles.append(None)
         print("Error: Could not connect to ",test_article['url'])
