@@ -22,7 +22,6 @@ class GenericParser:
     """Generic parser that is designed to work on as many sites as
     possible. All other parsers extend it.
     """
-    ### For the time being this is a copy of FaktyInteriaParser ###
     domains = []
 
     @classmethod
@@ -46,7 +45,6 @@ class GenericParser:
         ).extract_first()
         if title_str is not None:
             return title_str.strip() 
-        return None
 
     @classmethod
     def parse_text(cls, response):
@@ -63,7 +61,6 @@ class GenericParser:
         if len(date_strings) > 0:
             article_date = dateparser.parse(date_strings[0]).date()
             return article_date
-        return None
     
 class FaktyInteriaParser(GenericParser):
     """Parser that works on fakty.interia.pl"""
@@ -77,7 +74,6 @@ class FaktyInteriaParser(GenericParser):
         if title_str is not None:
             # Fix zero width spaces
             return title_str.strip().replace('\u200b', '')
-        return None
 
     @classmethod
     def parse_text(cls, response):
@@ -94,7 +90,6 @@ class FaktyInteriaParser(GenericParser):
         if len(date_strings) > 0:
             article_date = dateparser.parse(date_strings[0]).date()
             return article_date
-        return None
 
 class WiadomosciOnetParser(GenericParser):
     """Parser that works on wiadomosci.onet.pl"""
@@ -108,7 +103,6 @@ class WiadomosciOnetParser(GenericParser):
         if title_str is not None:
             # Fix zero width spaces
             return title_str.strip().replace('\u200b', '')
-        return None
 
     @classmethod
     def parse_text(cls, response):
