@@ -93,7 +93,7 @@ class FaktyInteriaParser(GenericParser):
 
 class WiadomosciOnetParser(GenericParser):
     """Parser that works on wiadomosci.onet.pl"""
-    domains = ['wiadomosci.onet.pl']
+    domains = ['wiadomosci.onet.pl', 'wroclaw.onet.pl']
 
     @classmethod
     def parse_title(cls, response):
