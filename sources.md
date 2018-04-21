@@ -1,5 +1,11 @@
 ## List of sources
 ### Implemented
+* wiadomosci.onet.pl
+* wroclaw.onet.pl
+* fakty.interia.pl
+* wiadomosci.gazeta.pl
+* nt.interia.pl
+* www.se.pl
 ### Unimplemented
 * https://sport.onet.pl/
 * https://wolna-polska.pl/
@@ -12,14 +18,12 @@
 * https://www.wprost.pl/
 * https://wolnemedia.net/
 * https://wiadomosci.robertbrzoza.pl/
-* https://wiadomosci.onet.pl/
 * https://kultura.onet.pl/
 * https://podroze.onet.pl/
 * https://kobieta.onet.pl/
 * https://wiadomosci.wp.pl/
 * https://www.money.pl/
 * https://sportowefakty.wp.pl/
-* https://fakty.interia.pl/
 * https://eurosport.interia.pl/
 * https://pogoda.interia.pl/
 * http://www.gazeta.pl/
