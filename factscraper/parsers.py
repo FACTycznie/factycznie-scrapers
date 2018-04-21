@@ -29,7 +29,7 @@ def validate_article(article_dict):
 
 class GenericParser:
     """Generic parser that is designed to work on as many sites as
-    possible. All other parsers extend it.
+    possible.
     """
     domains = []
 
@@ -78,18 +78,14 @@ class GenericParser:
             pass
     
 class FaktyInteriaParser(GenericParser):
-    """Parser that works on fakty.interia.pl"""
     domains = ['fakty.interia.pl']
-
     @classmethod
     def parse_text(cls, response):
         text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
         return text
 
 class WiadomosciOnetParser(GenericParser):
-    """Parser that works on wiadomosci.onet.pl"""
     domains = ['wiadomosci.onet.pl', 'wroclaw.onet.pl']
-
     @classmethod
     def parse_text(cls, response):
         article_lead = response.xpath("normalize-space(//div[@id='lead']/text())").extract()[0]
@@ -98,9 +94,7 @@ class WiadomosciOnetParser(GenericParser):
         return text
 
 class WiadomosciGazetaParser(GenericParser):
-    """Parser that works on wiadomosci.gazeta.pl"""
     domains = ['wiadomosci.gazeta.pl']
-
     @classmethod
     def parse_date(cls, response):
         try:
@@ -111,7 +105,6 @@ class WiadomosciGazetaParser(GenericParser):
 
 class SeParser(GenericParser):
     domains = ['www.se.pl']
-
     @classmethod
     def parse_text(cls, response):
         lead = response.xpath("//div[@class='lead']/p/text()").extract_first()
@@ -120,7 +113,6 @@ class SeParser(GenericParser):
 
 class NtInteriaParser(GenericParser):
     domains = ['nt.interia.pl']
-
     @classmethod
     def parse_text(cls, response):
         return "\n".join(response.xpath(
