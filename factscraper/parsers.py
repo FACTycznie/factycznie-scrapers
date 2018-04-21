@@ -97,12 +97,12 @@ class WiadomosciOnetParser(GenericParser):
 
     @classmethod
     def parse_title(cls, response):
-        title_str = response.xpath(
-            "normalize-space(//h1[@class='mainTitle']/text())"
-        ).extract_first()
-        if title_str is not None:
-            # Fix zero width spaces
-            return title_str.strip().replace('\u200b', '')
+        try:
+            return response.xpath(
+                "normalize-space(//h1[@class='mainTitle']/text())"
+            ).extract_first().strip().replace('\u200b', '')
+        except AttributeError:
+            pass
 
     @classmethod
     def parse_text(cls, response):
@@ -125,11 +125,11 @@ class WiadomosciGazetaParser(GenericParser):
 
     @classmethod
     def parse_date(cls, response):
-        date_string = response.xpath(
-            "//div[@id='gazeta_article_date']//time/@datetime").extract_first()
-        if date_string is not None:
-            article_date = dateparser.parse(date_string).date()
-            return article_date
+        try:
+            return dateparser.parse(response.xpath(
+                "//div[@id='gazeta_article_date']//time/@datetime").extract_first()).date()
+        except TypeError:
+            pass
 
     ### ### Parser choice ### ###
 
