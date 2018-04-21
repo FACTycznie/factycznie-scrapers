@@ -130,15 +130,5 @@ class TestGeneralAnalysis(unittest.TestCase):
                 analyzed['publish_date'],
                 dateparser.parse(desired['publish_date']).date(), msg))
 
-    def test_sources(self):
-        self._check_all(
-            lambda analyzed, desired, msg: self.assertSetEqual(
-                set(analyzed['sources']), set(desired['sources']), msg))
-
-    def test_authors(self):
-        self._check_all(
-            lambda analyzed, desired, msg: self.assertSetEqual(
-                set(analyzed['authors']), set(desired['authors']), msg))
-
 if __name__ == "__main__":
     unittest.main()
