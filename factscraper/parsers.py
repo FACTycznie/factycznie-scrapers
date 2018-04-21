@@ -110,6 +110,18 @@ class WiadomosciOnetParser(GenericParser):
         text = article_lead + "\n" + article_body
         return text
 
+class WiadomosciGazetaParser(GenericParser):
+    """Parser that works on wiadomosci.gazeta.pl"""
+    domains = ['wiadomosci.gazeta.pl']
+
+    @classmethod
+    def parse_date(cls, response):
+        date_string = response.xpath(
+            "//div[@id='gazeta_article_date']//time/@datetime").extract_first()
+        if date_string is not None:
+            article_date = dateparser.parse(date_string).date()
+            return article_date
+
     ### ### Parser choice ### ###
 
 def _is_parser(obj):
