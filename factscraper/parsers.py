@@ -100,6 +100,15 @@ class WiadomosciGazetaParser(GenericParser):
         except TypeError:
             pass
 
+class SeParser(GenericParser):
+    domains = ['www.se.pl']
+
+    @classmethod
+    def parse_text(cls, response):
+        lead = response.xpath("//div[@class='lead']/p/text()").extract_first()
+        body = "\n".join(response.xpath("//div[@class='text-block']/p//text()").extract())
+        return lead + body
+
     ### ### Parser choice ### ###
 
 def _is_parser(obj):
