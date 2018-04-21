@@ -40,11 +40,12 @@ class GenericParser:
 
     @classmethod
     def parse_title(cls, response):
-        title_str = response.xpath(
-            "/html/body/div/div/div/article/header/div/h1/text()"
-        ).extract_first()
-        if title_str is not None:
-            return title_str.strip() 
+        try:
+            return response.xpath(
+                "//meta[@property='og:title']/@content").extract_first(
+                ).strip().replace('\u200b', '') # fix zero width spaces
+        except AttributeError:
+            pass
 
     @classmethod
     def parse_text(cls, response):
@@ -67,15 +68,6 @@ class FaktyInteriaParser(GenericParser):
     domains = ['fakty.interia.pl']
 
     @classmethod
-    def parse_title(cls, response):
-        title_str = response.xpath(
-            "normalize-space(/html/body/div/div/div/article/header/div/h1/text())"
-        ).extract_first()
-        if title_str is not None:
-            # Fix zero width spaces
-            return title_str.strip().replace('\u200b', '')
-
-    @classmethod
     def parse_text(cls, response):
         text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
         return text
@@ -96,15 +88,6 @@ class WiadomosciOnetParser(GenericParser):
     domains = ['wiadomosci.onet.pl', 'wroclaw.onet.pl']
 
     @classmethod
-    def parse_title(cls, response):
-        try:
-            return response.xpath(
-                "normalize-space(//h1[@class='mainTitle']/text())"
-            ).extract_first().strip().replace('\u200b', '')
-        except AttributeError:
-            pass
-
-    @classmethod
     def parse_text(cls, response):
         article_lead = response.xpath("normalize-space(//div[@id='lead']/text())").extract()[0]
         article_body = "\n".join(response.xpath("//div[@itemprop='articleBody']/p/text()").extract())
@@ -114,14 +97,6 @@ class WiadomosciOnetParser(GenericParser):
 class WiadomosciGazetaParser(GenericParser):
     """Parser that works on wiadomosci.gazeta.pl"""
     domains = ['wiadomosci.gazeta.pl']
-
-    @classmethod
-    def parse_title(cls, response):
-        try:
-            return response.xpath(
-                "//div[@id='content']//h1/text()").extract_first().strip()
-        except AttributeError:
-            pass
 
     @classmethod
     def parse_date(cls, response):
