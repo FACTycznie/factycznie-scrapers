@@ -2,17 +2,18 @@ import scrapy
 import dateparser
 import re
 
-from factscraper import InvalidArticleError
+from factscraper import InvalidArticleError, RELIABLE_DOMAINS
 from factscraper.parsers import select_parser
 
 class FactycznieSpider(scrapy.Spider):
     name = 'factycznie.spider'
 
-    allowed_domains = ['www.tvn24.pl',
-                       'fakty.interia.pl']
+    allowed_domains = RELIABLE_DOMAINS
+
     start_urls = [
         'http://fakty.interia.pl/',
-        'https://www.tvn24.pl/najwazniejsze.xml']
+        'https://www.tvn24.pl/najwazniejsze.xml',
+        'http://www.rmf24.pl/fakty/feed']
 
     def start_requests(self):
         for url in self.start_urls:
@@ -21,7 +22,7 @@ class FactycznieSpider(scrapy.Spider):
        
     def parse_frontpage(self, response):
         links = []
-        # www.tvn24.pl rss
+        # RSS feeds
         links.extend(response.xpath("//item/link/text()").extract())
         # fakty.interia.pl frontpage
         links.extend(response.xpath(

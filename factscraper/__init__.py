@@ -10,6 +10,18 @@ class InvalidArticleError(Exception):
 # Minimum length of the body of an article in characters
 MINIMUM_ARTICLE_LENGTH = 300
 
+# Domains from which articles had been confirmed to be parsed correctly
+RELIABLE_DOMAINS = [
+    "nt.interia.pl",
+    "wiadomosci.onet.pl",
+    "wiadomosci.gazeta.pl",
+    "www.newsweek.pl",
+    "www.se.pl",
+    "fakty.interia.pl",
+    "wroclaw.onet.pl",
+    "www.rmf24.pl",
+    "www.tvn24.pl"]
+
 from factscraper import parsers, downloader
 
 def analyze_url(url, verbose=False, parser=None, validate=True):
