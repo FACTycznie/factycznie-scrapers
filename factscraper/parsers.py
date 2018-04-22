@@ -118,6 +118,18 @@ class NtInteriaParser(GenericParser):
         return "\n".join(response.xpath(
             "//div[@class='article-body']/p/text()").extract())
 
+class Tvn24Parser(GenericParser):
+    domains = ['www.tvn24.pl']
+    @classmethod
+    def parse_text(cls, response):
+        try:
+            article_sel = response.xpath("//article")[0]
+        except IndexError:
+            return
+        lead = article_sel.xpath('normalize-space(h2//text())').extract_first()
+        body = "\n".join(article_sel.xpath('p/text()').extract())
+        return lead + "\n" + body
+
     ### ### Parser choice ### ###
 
 def _is_parser(obj):
