@@ -124,7 +124,7 @@ class NtInteriaParser(GenericParser):
         return "\n".join(response.xpath(
             "//div[@class='article-body']/p/text()").extract())
 
-class Tvn24Parser(GenericParser):
+class TVN24Parser(GenericParser):
     domains = ['www.tvn24.pl']
     @classmethod
     def parse_text(cls, response):
