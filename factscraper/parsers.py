@@ -101,7 +101,8 @@ class FaktyInteriaParser(GenericParser):
     domains = ['fakty.interia.pl']
     @classmethod
     def parse_text(cls, response):
-        text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
+        text = "\n".join([clean_string(string) for string in 
+                          response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::script)][not(descendant-or-self::div)]//text()").extract()])
         return text
 
 class WiadomosciOnetParser(GenericParser):
@@ -135,8 +136,8 @@ class NtInteriaParser(GenericParser):
     domains = ['nt.interia.pl']
     @classmethod
     def parse_text(cls, response):
-        return "\n".join(response.xpath(
-            "//div[@class='article-body']/p/text()").extract())
+        return "\n".join([clean_string(string) for string in
+            response.xpath("//div[@class='article-body']/p/text()").extract()])
 
 class TVN24Parser(GenericParser):
     domains = ['www.tvn24.pl']
