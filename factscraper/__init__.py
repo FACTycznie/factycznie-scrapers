@@ -8,7 +8,7 @@ class InvalidArticleError(Exception):
     """Raised when a webpage is not an article"""
 
 # Minimum length of the body of an article in characters
-MINIMUM_ARTICLE_LENGTH = 400
+MINIMUM_ARTICLE_LENGTH = 300
 
 from factscraper import parsers, downloader
 
