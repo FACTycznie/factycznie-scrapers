@@ -1,36 +1,25 @@
 ## List of sources
-### Implemented
+### Fully implemented
+
+### Parseable
 * wiadomosci.onet.pl
-* wroclaw.onet.pl
-* fakty.interia.pl
+* fakty.interia.pl & nt.interia.pl
 * wiadomosci.gazeta.pl
-* nt.interia.pl
 * www.se.pl
+
 ### Unimplemented
-* https://sport.onet.pl/
-* https://wolna-polska.pl/
-* https://pl.sputniknews.com/
-* https://film.onet.pl
-* http://www.fronda.pl/
-* https://pikio.pl/
-* http://www.newsweek.pl/
-* https://www.pudelek.pl/
-* https://www.wprost.pl/
-* https://wolnemedia.net/
-* https://wiadomosci.robertbrzoza.pl/
-* https://kultura.onet.pl/
-* https://podroze.onet.pl/
-* https://kobieta.onet.pl/
-* https://wiadomosci.wp.pl/
-* https://www.money.pl/
-* https://sportowefakty.wp.pl/
-* https://eurosport.interia.pl/
-* https://pogoda.interia.pl/
-* http://www.gazeta.pl/
-* http://natemat.pl/
-* http://aszdziennik.pl/
-* https://technowinki.onet.pl/
-* https://muzyka.onet.pl/
-* https://moto.onet.pl/
-* https://biznes.onet.pl
-* https://www.fakt.pl/
+* www.tvn24.pl
+* www.polsatnews.pl
+* pikio.pl
+* www.newsweek.pl
+* www.rp.pl
+* www.rmf24.pl
+* www.money.pl
+* www.pudelek.pl
+* www.wprost.pl
+* wiadomosci.wp.pl
+* www.gazeta.pl
+* natemat.pl
+* aszdziennik.pl
+* www.fakt.pl
+* www.fronda.pl
