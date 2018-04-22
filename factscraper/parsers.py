@@ -137,8 +137,11 @@ class Tvn24Parser(GenericParser):
         return lead + "\n" + body
     @classmethod
     def parse_date(cls, response):
-        return dateparser.parse(
-            response.xpath("//article/time/@datetime").extract_first()).date()
+        try:
+            return dateparser.parse(
+                response.xpath("//div[contains(@class, 'mainContainer')]//time/@datetime").extract_first()).date()
+        except:
+            pass
 
 class RMF24Parser(GenericParser):
     domains = ['www.rmf24.pl']
