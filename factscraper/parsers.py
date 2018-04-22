@@ -9,7 +9,7 @@ import dateparser
 import re
 
 from factscraper import InvalidArticleError, MINIMUM_ARTICLE_LENGTH
-from factscraper.util import clean_url, get_domain
+from factscraper.util import clean_url, get_domain, clean_string
 
 def validate_article(article_dict):
     """Checks whether a parsed article dict is valid, and returns an
@@ -35,12 +35,15 @@ class GenericParser:
 
     @classmethod
     def parse(cls, response, validate=True):
-        out_dict = {
-            'url': clean_url(response.url),
-            'domain': get_domain(response.url),
-            'title': cls.parse_title(response),
-            'text': cls.parse_text(response),
-            'publish_date': cls.parse_date(response)}
+        try:
+            out_dict = {
+                'url': clean_url(response.url),
+                'domain': get_domain(response.url),
+                'title': cls.parse_title(response),
+                'text': cls.parse_text(response),
+                'publish_date': cls.parse_date(response)}
+        except Exception as exc:
+            raise InvalidArticleError from exc
         if validate:
             invalid_article_exception = validate_article(out_dict)
             if invalid_article_exception is not None:
@@ -50,17 +53,20 @@ class GenericParser:
     @classmethod
     def parse_title(cls, response):
         try:
-            return response.xpath(
-                "//meta[@property='og:title']/@content").extract_first(
-                ).strip().replace('\u200b', '') # fix zero width spaces
+            return clean_string(response.xpath(
+                "//meta[@property='og:title']/@content").extract_first())
         except AttributeError:
             pass
 
     @classmethod
     def parse_text(cls, response):
-        article_lead = "\n".join(response.xpath("//div[contains(@id, 'lead')][contains(@id, 'article')]/text()").extract())
-        article_body = "\n".join(response.xpath("normalize-space(//div[contains(@id, 'body')][contains(@id, 'article')])").extract())
-        text = article_lead + "\n" + article_body
+        article_lead = response.xpath(
+            "//div[contains(@id, 'lead')][contains(@id, 'article')]/text()").extract()
+        article_body = response.xpath(
+            "normalize-space(//div[contains(@id, 'ody')][contains(@id, 'article')])").extract()
+        article_content = response.xpath("//div[contains(@class, 'ontent')][contains(@class, 'article')]/p").xpath("normalize-space(.)").extract()
+        complete_article = article_lead + article_body + article_content
+        text = "\n".join(complete_article)
         if len(text) < MINIMUM_ARTICLE_LENGTH:
             text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
         return text
