@@ -2,18 +2,18 @@
 ### Fully implemented
 
 ### Parseable
-* wiadomosci.onet.pl
+* wiadomosci.onet.pl & wroclaw.onet.pl
 * fakty.interia.pl & nt.interia.pl
 * wiadomosci.gazeta.pl
 * www.se.pl
+* www.newsweek.pl
+* www.rmf24.pl
+* www.tvn24.pl
 
 ### Unimplemented
-* www.tvn24.pl
 * www.polsatnews.pl
 * pikio.pl
-* www.newsweek.pl
 * www.rp.pl
-* www.rmf24.pl
 * www.money.pl
 * www.pudelek.pl
 * www.wprost.pl
