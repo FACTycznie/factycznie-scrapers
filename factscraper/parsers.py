@@ -131,7 +131,7 @@ class Tvn24Parser(GenericParser):
         try:
             article_sel = response.xpath("//article")[0]
         except IndexError:
-            return
+            raise InvalidArticleError("Article container not found")
         lead = article_sel.xpath('normalize-space(h2//text())').extract_first()
         body = "\n".join(article_sel.xpath('p/text()').extract())
         return lead + "\n" + body
@@ -145,6 +145,18 @@ class RMF24Parser(GenericParser):
     @classmethod
     def parse_text(cls, response):
         return "\n".join([clean_string(paragraph) for paragraph in response.xpath("//div[@class='article-container']//p//text()").extract()])
+
+class NewsweekParser(GenericParser):
+    domains = ['www.newsweek.pl']
+    @classmethod
+    def parse_text(cls, response):
+        try:
+            article_sel = response.xpath("//div[@class='artLeft']")[0]
+        except IndexError:
+            raise InvalidArticleError("Article container not found")
+        paragraphs = article_sel.xpath(".//p[not(descendant-or-self::script)]//text()").extract()
+        text = "\n".join(map(clean_string, paragraphs))
+        return text
 
     ### ### Parser choice ### ###
 
