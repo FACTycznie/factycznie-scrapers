@@ -73,15 +73,16 @@ class GenericParser:
 
     @classmethod
     def parse_text(cls, response):
-        article_lead = response.xpath(
-            "//div[contains(@id, 'lead')][contains(@id, 'article')]/text()").extract()
-        article_body = response.xpath(
-            "normalize-space(//div[contains(@id, 'ody')][contains(@id, 'article')])").extract()
-        article_content = response.xpath("//div[contains(@class, 'ontent')][contains(@class, 'article')]/p").xpath("normalize-space(.)").extract()
-        complete_article = article_lead + article_body + article_content
+        possible_xpaths = [
+            "//div[contains(@id, 'lead')][contains(@id, 'article')]/text()",
+            "//div[contains(@id, 'ody')][contains(@id, 'article')]//node()[not(descendant-or-self::script)][not(descendant-or-self::div)]//text()",
+            "//div[contains(@class, 'ody')][contains(@class, 'article')]//node()[not(descendant-or-self::script)][not(descendant-or-self::div)]//text()",
+            "//div[contains(@class, 'ontent')][contains(@class, 'article')]//node()[not(descendant-or-self::script)][not(descendant-or-self::div)]//text()"]
+        complete_article = []
+        for xpath in possible_xpaths:
+            complete_article.extend([clean_string(string) for string 
+                                     in response.xpath(xpath).extract()])
         text = "\n".join(complete_article)
-        if len(text) < MINIMUM_ARTICLE_LENGTH:
-            text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::script)][not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
         return text
 
     @classmethod
