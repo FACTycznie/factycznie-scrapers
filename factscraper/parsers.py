@@ -81,7 +81,7 @@ class GenericParser:
         complete_article = article_lead + article_body + article_content
         text = "\n".join(complete_article)
         if len(text) < MINIMUM_ARTICLE_LENGTH:
-            text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
+            text = " ".join(response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::script)][not(descendant-or-self::div)]//text()").re("[^\ '\\xa0']+"))
         return text
 
     @classmethod
