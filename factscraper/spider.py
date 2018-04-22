@@ -5,7 +5,12 @@ from factscraper.parsers import select_parser
 from factscraper.util import get_domain, get_scheme
 
 def _append_prefix(response, local_url):
-    return get_scheme(response.url) + "://" + get_domain(response.url) + local_url
+    out_url = local_url
+    if get_domain(out_url) == "":
+        out_url = get_domain(response.url) + out_url
+    if get_scheme(out_url) == "":
+        out_url = get_scheme(response.url) + "://" + out_url
+    return out_url
 
 def _gather_links(response):
     links = []
