@@ -135,6 +135,10 @@ class Tvn24Parser(GenericParser):
         lead = article_sel.xpath('normalize-space(h2//text())').extract_first()
         body = "\n".join(article_sel.xpath('p/text()').extract())
         return lead + "\n" + body
+    @classmethod
+    def parse_date(cls, response):
+        return dateparser.parse(
+            response.xpath("//article/time/@datetime").extract_first()).date()
 
 class RMF24Parser(GenericParser):
     domains = ['www.rmf24.pl']
