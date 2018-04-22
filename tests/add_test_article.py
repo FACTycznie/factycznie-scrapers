@@ -13,7 +13,7 @@ def _input_long_text(text_type):
     if os.path.isfile(file_name):
         text = open(file_name,"r").read() #Read the file and put the message into a variable
         os.remove(file_name) #Remove the temporary message file
-        print(text_type, "of length", len(text_type), "retrieved")
+        print(text_type, "of length", len(text), "retrieved")
         return text
     else:
         print("No", text_type, "file found\nExiting")
