@@ -2,6 +2,27 @@ import scrapy
 
 from factscraper import InvalidArticleError, RELIABLE_DOMAINS
 from factscraper.parsers import select_parser
+from factscraper.util import get_domain, get_scheme
+
+def _append_prefix(response, local_url):
+    return get_scheme(response.url) + "://" + get_domain(response.url) + local_url
+
+def _gather_links(response):
+    links = []
+    # RSS feeds
+    links.extend(response.xpath("//item/link/text()").extract())
+    # fakty.interia.pl frontpage
+    links.extend(response.xpath(
+        "/html/body/div/div/div/section/ul/li/div/div/h2/a/@href").extract())
+    # desperate to get all links
+    links.extend(response.xpath("//a/@href").extract())
+
+    out_links = set()
+    for link in links:
+        if get_domain(link) == "" or get_scheme(link) == "":
+            link = _append_prefix(response, link)
+        out_links.add(link)
+    return out_links
 
 class FactycznieSpider(scrapy.Spider):
     name = 'factycznie.spider'
@@ -19,17 +40,15 @@ class FactycznieSpider(scrapy.Spider):
                              self.parse_frontpage)
        
     def parse_frontpage(self, response):
-        links = []
-        # RSS feeds
-        links.extend(response.xpath("//item/link/text()").extract())
-        # fakty.interia.pl frontpage
-        links.extend(response.xpath(
-            "/html/body/div/div/div/section/ul/li/div/div/h2/a/@href").extract())
+        links = _gather_links(response)
         for link in links:
             yield response.follow(link, callback=self.parse)
 
     def parse(self, response):
         try:
-            return select_parser(response.url).parse(response)
+            yield select_parser(response.url).parse(response)
         except InvalidArticleError:
             pass
+        links = _gather_links(response)
+        for link in links:
+            yield scrapy.Request(link, callback=self.parse)
