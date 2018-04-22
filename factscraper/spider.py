@@ -1,6 +1,4 @@
 import scrapy
-import dateparser
-import re
 
 from factscraper import InvalidArticleError, RELIABLE_DOMAINS
 from factscraper.parsers import select_parser

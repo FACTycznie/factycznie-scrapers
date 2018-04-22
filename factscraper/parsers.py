@@ -27,6 +27,12 @@ def validate_article(article_dict):
     if len(article_dict['text']) < MINIMUM_ARTICLE_LENGTH:
         return InvalidArticleError("Article is too short")
 
+def _try_parsing(function, argument):
+    try:
+        return function(argument)
+    except Exception as exc:
+        return None
+
 class GenericParser:
     """Generic parser that is designed to work on as many sites as
     possible.
@@ -35,19 +41,26 @@ class GenericParser:
 
     @classmethod
     def parse(cls, response, validate=True):
-        try:
-            out_dict = {
-                'url': clean_url(response.url),
-                'domain': get_domain(response.url),
-                'title': cls.parse_title(response),
-                'text': cls.parse_text(response),
-                'publish_date': cls.parse_date(response)}
-        except Exception as exc:
-            raise InvalidArticleError from exc
         if validate:
+            try:
+                out_dict = {
+                    'url': clean_url(response.url),
+                    'domain': get_domain(response.url),
+                    'title': cls.parse_title(response),
+                    'text': cls.parse_text(response),
+                    'publish_date': cls.parse_date(response)}
+            except Exception as exc:
+                raise InvalidArticleError from exc
             invalid_article_exception = validate_article(out_dict)
             if invalid_article_exception is not None:
                 raise invalid_article_exception
+        else:
+            out_dict = {
+                'url': _try_parsing(clean_url, response.url),
+                'domain': _try_parsing(get_domain, response.url),
+                'title': _try_parsing(cls.parse_title, response),
+                'text': _try_parsing(cls.parse_text, response),
+                'publish_date': _try_parsing(cls.parse_date, response)}
         return out_dict
 
     @classmethod
@@ -130,8 +143,8 @@ class TVN24Parser(GenericParser):
     def parse_text(cls, response):
         try:
             article_sel = response.xpath("//article")[0]
-        except IndexError:
-            raise InvalidArticleError("Article container not found")
+        except IndexError as exc:
+            raise InvalidArticleError("Article container not found") from exc
         lead = article_sel.xpath('normalize-space(h2//text())').extract_first()
         body = "\n".join(article_sel.xpath('p/text()').extract())
         return lead + "\n" + body
@@ -155,8 +168,8 @@ class NewsweekParser(GenericParser):
     def parse_text(cls, response):
         try:
             article_sel = response.xpath("//div[@class='artLeft']")[0]
-        except IndexError:
-            raise InvalidArticleError("Article container not found")
+        except IndexError as exc:
+            raise InvalidArticleError("Article container not found") from exc
         paragraphs = article_sel.xpath(".//p[not(descendant-or-self::script)]//text()").extract()
         text = "\n".join(map(clean_string, paragraphs))
         return text
