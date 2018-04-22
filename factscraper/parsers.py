@@ -136,6 +136,12 @@ class Tvn24Parser(GenericParser):
         body = "\n".join(article_sel.xpath('p/text()').extract())
         return lead + "\n" + body
 
+class RMF24Parser(GenericParser):
+    domains = ['www.rmf24.pl']
+    @classmethod
+    def parse_text(cls, response):
+        return "\n".join([clean_string(paragraph) for paragraph in response.xpath("//div[@class='article-container']//p//text()").extract()])
+
     ### ### Parser choice ### ###
 
 def _is_parser(obj):
