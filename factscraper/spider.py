@@ -35,6 +35,14 @@ class FactycznieSpider(scrapy.Spider):
     allowed_domains = RELIABLE_DOMAINS
 
     start_urls = [
+        'http://nt.interia.pl/',
+        'https://wiadomosci.onet.pl/',
+        'http://wiadomosci.gazeta.pl/wiadomosci/0,0.html',
+        'http://www.newsweek.pl/',
+        'http://www.se.pl/',
+        'https://wroclaw.onet.pl/',
+        'https://www.tvn24.pl/',
+        'http://www.rmf24.pl/',
         'http://fakty.interia.pl/',
         'https://www.tvn24.pl/najwazniejsze.xml',
         'http://www.rmf24.pl/fakty/feed']
