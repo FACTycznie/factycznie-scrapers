@@ -10,8 +10,11 @@ import json
 import scrapy
 from datetime import date, datetime
 import editdistance
+import dateparser
+import requests
 
 from factscraper import analyze_url, InvalidArticleError
+from factscraper.util import get_domain
 
 # Maximum ratio of Levenshtein distance between article text parsing
 # result and the original to the original's length for us to consider
@@ -31,7 +34,10 @@ try:
             article['publish_date'] = datetime.strptime(
                 article['publish_date'], "%Y-%m-%d")
             test_articles.append(json.loads(line))
-
+        print("Domains of articles to be tested: ")
+        for domain in set([get_domain(article['url']) 
+                           for article in test_articles]):
+            print(domain)
 except FileNotFoundError:
     raise FileNotFoundError(("test_articles.jsonl file not found. Please "
                              "create it with add_test_article.py script."))
@@ -45,7 +51,11 @@ for test_article in test_articles:
     try:
         _downloaded_articles.append(analyze_url(test_article['url']))
     except InvalidArticleError:
-        pass
+        _downloaded_articles.append(analyze_url(test_article['url'],
+                                                validate=False))
+    except requests.exceptions.ConnectionError:
+        _downloaded_articles.append(None)
+        print("Error: Could not connect to ",test_article['url'])
 
 #
 ###  Testing stuff ###
@@ -100,17 +110,21 @@ class TestGeneralAnalysis(unittest.TestCase):
         """This helper method runs a given assert function on all articles."""
         for analyzed, desired in zip(self.articles, test_articles):
             with self.subTest(url=desired['url']):
+                if analyzed is None:
+                    self.skipTest("Skipping empty article: "+desired['url'])
                 function(analyzed, desired, 
                          msg="\nError when analyzing {}".format(desired['url']))
-    
+        
     def test_title(self):
         self._check_all(
             lambda analyzed, desired, msg: self.assertEqual(
-                analyzed['title'], desired['title'], msg))
+                analyzed['title'], desired['title'].strip(), msg))
     
     def _check_text_equality(self, analyzed, desired, msg):
         levenshtein_distance = editdistance.eval(analyzed['text'],
                                                  desired['text'])
+        msg += "\n\n\tDesired:\n" + desired['text']
+        msg += "\n\tActual:\n" + analyzed['text']
         ratio = levenshtein_distance / len(desired['text'])
         self.assertLess(ratio, ARTICLE_TEXT_EDIT_DISTANCE_THRESHOLD, msg=msg)
 
@@ -120,17 +134,8 @@ class TestGeneralAnalysis(unittest.TestCase):
     def test_date(self):
         self._check_all(
             lambda analyzed, desired, msg: self.assertEqual(
-                analyzed['publish_date'], desired['publish_date'], msg))
-
-    def test_sources(self):
-        self._check_all(
-            lambda analyzed, desired, msg: self.assertSetEqual(
-                set(analyzed['sources']), set(desired['sources']), msg))
-
-    def test_authors(self):
-        self._check_all(
-            lambda analyzed, desired, msg: self.assertSetEqual(
-                set(analyzed['authors']), set(desired['authors']), msg))
+                analyzed['publish_date'],
+                dateparser.parse(desired['publish_date']).date(), msg))
 
 if __name__ == "__main__":
     unittest.main()

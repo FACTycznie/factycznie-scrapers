@@ -7,13 +7,15 @@ from subprocess import call
 from datetime import datetime
 import json
 
+from factscraper.util import clean_string
+
 def _input_long_text(text_type):
     file_name = "/tmp/temp_" + text_type
     call(["vim", file_name])
     if os.path.isfile(file_name):
-        text = open(file_name,"r").read() #Read the file and put the message into a variable
+        text = clean_string(open(file_name, "r").read()) #Read the file and put the message into a variable
         os.remove(file_name) #Remove the temporary message file
-        print(text_type, "of length", len(text_type), "retrieved")
+        print(text_type, "of length", len(text), "retrieved")
         return text
     else:
         print("No", text_type, "file found\nExiting")

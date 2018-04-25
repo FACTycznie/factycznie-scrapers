@@ -1,3 +1,5 @@
+import unicodedata
+
 from urllib.parse import urlparse, urlunparse
 
 def clean_url(url, scheme=None):
@@ -21,3 +23,7 @@ def get_scheme(url):
     """Returns the scheme from a url, e.g. http or https."""
     parsed_url = urlparse(url)
     return parsed_url.scheme
+
+def clean_string(string):
+    """Returns a unicode normalized, whitespace stripped string."""
+    return unicodedata.normalize('NFKC', string).replace('\u200b', '').strip()

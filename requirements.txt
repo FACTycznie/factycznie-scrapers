@@ -1,1 +1,4 @@
 editdistance==0.4
+dateparser==0.7.0
+requests==2.18.4
+Scrapy==1.5.0
