@@ -11,6 +11,7 @@ import re
 from factscraper import InvalidArticleError, MINIMUM_ARTICLE_LENGTH
 from factscraper.util import clean_url, get_domain, clean_string
 
+
 def validate_article(article_dict):
     """Checks whether a parsed article dict is valid, and returns an
     exception if it isn't.
@@ -27,11 +28,13 @@ def validate_article(article_dict):
     if len(article_dict['text']) < MINIMUM_ARTICLE_LENGTH:
         return InvalidArticleError("Article is too short")
 
+
 def _try_parsing(function, argument):
     try:
         return function(argument)
     except Exception as exc:
         return None
+
 
 class GenericParser:
     """Generic parser that is designed to work on as many sites as
@@ -96,17 +99,22 @@ class GenericParser:
             return dateparser.parse(date_string).date()
         except TypeError:
             pass
-    
+
+
 class FaktyInteriaParser(GenericParser):
     domains = ['fakty.interia.pl']
+
     @classmethod
     def parse_text(cls, response):
-        text = "\n".join([clean_string(string) for string in 
-                          response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::script)][not(descendant-or-self::div)]//text()").extract()])
+        text = "\n".join(
+            [clean_string(string) for string in <response.xpath("//div[@class='article-body']/node()[not(descendant-or-self::script)][not(descendant-or-self::div)]//text()").extract()]
+        )
         return text
+
 
 class WiadomosciOnetParser(GenericParser):
     domains = ['wiadomosci.onet.pl', 'wroclaw.onet.pl']
+
     @classmethod
     def parse_text(cls, response):
         article_lead = response.xpath("normalize-space(//div[@id='lead']/text())").extract()[0]
@@ -114,8 +122,10 @@ class WiadomosciOnetParser(GenericParser):
         text = article_lead + "\n" + article_body
         return text
 
+
 class WiadomosciGazetaParser(GenericParser):
     domains = ['wiadomosci.gazeta.pl']
+
     @classmethod
     def parse_date(cls, response):
         try:
@@ -124,23 +134,30 @@ class WiadomosciGazetaParser(GenericParser):
         except TypeError:
             pass
 
+
 class SeParser(GenericParser):
     domains = ['www.se.pl']
+
     @classmethod
     def parse_text(cls, response):
         lead = response.xpath("//div[@class='lead']/p/text()").extract_first()
         body = "\n".join(response.xpath("//div[@class='text-block']/p//text()").extract())
         return lead + body
 
+
 class NtInteriaParser(GenericParser):
     domains = ['nt.interia.pl']
+
     @classmethod
     def parse_text(cls, response):
-        return "\n".join([clean_string(string) for string in
-            response.xpath("//div[@class='article-body']/p/text()").extract()])
+        return "\n".join(
+            [clean_string(string) for string in response.xpath("//div[@class='article-body']/p/text()").extract()]
+        )
+
 
 class TVN24Parser(GenericParser):
     domains = ['www.tvn24.pl']
+
     @classmethod
     def parse_text(cls, response):
         try:
@@ -150,6 +167,7 @@ class TVN24Parser(GenericParser):
         lead = article_sel.xpath('normalize-space(h2//text())').extract_first()
         body = "\n".join(article_sel.xpath('p/text()').extract())
         return lead + "\n" + body
+
     @classmethod
     def parse_date(cls, response):
         try:
@@ -158,14 +176,18 @@ class TVN24Parser(GenericParser):
         except:
             pass
 
+
 class RMF24Parser(GenericParser):
     domains = ['www.rmf24.pl']
+
     @classmethod
     def parse_text(cls, response):
         return "\n".join([clean_string(paragraph) for paragraph in response.xpath("//div[@class='article-container']//p//text()").extract()])
 
+
 class NewsweekParser(GenericParser):
     domains = ['www.newsweek.pl']
+
     @classmethod
     def parse_text(cls, response):
         try:
@@ -176,16 +198,18 @@ class NewsweekParser(GenericParser):
         text = "\n".join(map(clean_string, paragraphs))
         return text
 
-    ### ### Parser choice ### ###
 
+### ### Parser choice ### ###
 def _is_parser(obj):
     is_class = inspect.isclass(obj)
     if is_class:
         return issubclass(obj, GenericParser)
     return False
 
+
 _parser_collection = inspect.getmembers(
     sys.modules[__name__], _is_parser)
+
 
 parser_dict = {}
 for parser_tuple in _parser_collection:
@@ -195,6 +219,7 @@ for parser_tuple in _parser_collection:
         else:
             raise ValueError("Domain {} already handled by {}".format(
                 domain, parser_dict[domain].__name__))
+
 
 def select_parser(url):
     """Selects the correct parser for a url based on its domain."""

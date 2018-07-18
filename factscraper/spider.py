@@ -4,6 +4,7 @@ from factscraper import InvalidArticleError, RELIABLE_DOMAINS
 from factscraper.parsers import select_parser
 from factscraper.util import get_domain, get_scheme
 
+
 def _append_prefix(response, local_url):
     out_url = local_url
     if get_domain(out_url) == "":
@@ -11,6 +12,7 @@ def _append_prefix(response, local_url):
     if get_scheme(out_url) == "":
         out_url = get_scheme(response.url) + "://" + out_url
     return out_url
+
 
 def _gather_links(response):
     links = []
@@ -28,6 +30,7 @@ def _gather_links(response):
             link = _append_prefix(response, link)
         out_links.add(link)
     return out_links
+
 
 class FactycznieSpider(scrapy.Spider):
     name = 'factycznie.spider'
